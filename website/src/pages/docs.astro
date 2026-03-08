@@ -1,0 +1,140 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.svelte';
+import Footer from '../components/Footer.svelte';
+
+export const prerender = true;
+---
+<Base title="Docs — Freeloader" description="Getting started guide, configuration reference, and API docs for Freeloader.">
+  <Nav client:load />
+  <div class="max-w-4xl mx-auto px-4 pt-28 pb-12">
+    <div class="flex gap-8">
+      <!-- Sidebar -->
+      <aside class="hidden lg:block w-56 shrink-0">
+        <nav class="sticky top-28 space-y-1 text-sm">
+          {[
+            ['#install', 'Getting Started'],
+            ['#config', 'Configuration'],
+            ['#api', 'API Reference'],
+            ['#trust', 'Trust Tiers'],
+            ['#providers', 'Provider Adapters'],
+          ].map(([href, label]) => (
+            <a href={href} class="block px-3 py-1.5 rounded text-faded hover:text-ink hover:bg-cream transition-colors font-body">{label}</a>
+          ))}
+        </nav>
+      </aside>
+
+      <!-- Content -->
+      <main class="flex-1 min-w-0 max-w-none">
+        <h1 class="text-3xl font-heading mb-2 text-ink">Documentation</h1>
+        <p class="text-faded font-body mb-12">Everything you need to stop paying for AI.</p>
+
+        <section id="install" class="mb-16 scroll-mt-24">
+          <h2 class="text-2xl font-heading text-ink mb-4">Getting Started</h2>
+          <h3 class="text-lg font-heading text-ink mb-3">Install & Run</h3>
+          <div class="bg-paper border-2 border-dashed border-kraft rounded-xl p-4 font-typewriter text-sm mb-4">
+            <span class="text-faded"># one-shot, no install required</span><br/>
+            <span class="text-savings">$ npx xswarm-freeloader</span>
+          </div>
+          <p class="text-faded font-body">This starts an OpenAI-compatible proxy on <code class="font-typewriter text-savings">http://localhost:4011</code>. Point any OpenAI SDK at it.</p>
+          <h3 class="text-lg font-heading text-ink mt-6 mb-3">Global Install</h3>
+          <div class="bg-paper border-2 border-dashed border-kraft rounded-xl p-4 font-typewriter text-sm mb-4">
+            <span class="text-savings">$ npm install -g xswarm-freeloader</span><br/>
+            <span class="text-savings">$ freeloader start</span>
+          </div>
+          <h3 class="text-lg font-heading text-ink mt-6 mb-3">Set your base URL</h3>
+          <div class="bg-paper border-2 border-dashed border-kraft rounded-xl p-4 font-typewriter text-sm">
+            <span class="text-faded"># .env</span><br/>
+            <span class="text-ink">OPENAI_BASE_URL=<span class="text-savings">http://localhost:4011</span></span><br/>
+            <span class="text-ink">OPENAI_API_KEY=<span class="text-savings">free</span> <span class="text-faded"># any string</span></span>
+          </div>
+        </section>
+
+        <section id="config" class="mb-16 scroll-mt-24">
+          <h2 class="text-2xl font-heading text-ink mb-4">Configuration</h2>
+          <p class="text-faded font-body mb-4">Create <code class="font-typewriter text-savings">freeloader.config.json</code> in your project root:</p>
+          <div class="bg-paper border-2 border-dashed border-kraft rounded-xl p-4 font-typewriter text-sm space-y-1">
+            <span class="text-ink">{"{"}</span><br/>
+            <span class="pl-4 text-marker">"port"</span><span class="text-ink">: </span><span class="text-savings">4011</span><span class="text-ink">,</span><br/>
+            <span class="pl-4 text-marker">"budget"</span><span class="text-ink">: {"{"}</span><br/>
+            <span class="pl-8 text-marker">"monthly_usd"</span><span class="text-ink">: </span><span class="text-savings">0</span><span class="text-faded">  // hard cap at $0</span><br/>
+            <span class="pl-4 text-ink">{"}"}</span><span class="text-ink">,</span><br/>
+            <span class="pl-4 text-marker">"strategy"</span><span class="text-ink">: </span><span class="text-savings">"free-first"</span><span class="text-ink">,</span><br/>
+            <span class="pl-4 text-marker">"trust_tier"</span><span class="text-ink">: </span><span class="text-savings">"standard"</span><span class="text-ink">,</span><br/>
+            <span class="pl-4 text-marker">"providers"</span><span class="text-ink">: ["google", "groq", "together", "ollama"]</span><br/>
+            <span class="text-ink">{"}"}</span>
+          </div>
+          <div class="mt-6 space-y-3">
+            {[
+              ['strategy', '"free-first" | "cheapest" | "fastest" | "best"', 'How to select models'],
+              ['trust_tier', '"open" | "standard" | "private"', 'Maximum trust level for routing'],
+              ['budget.monthly_usd', 'number', 'Hard monthly spend cap (0 = free only)'],
+              ['providers', 'string[]', 'Enabled provider adapters'],
+              ['cache', 'boolean', 'Enable prompt-level caching (default: true)'],
+            ].map(([key, type, desc]) => (
+              <div class="bg-paper border border-kraft rounded-lg p-3 text-sm grid grid-cols-3 gap-4">
+                <code class="font-typewriter text-savings">{key}</code>
+                <code class="font-typewriter text-faded text-xs">{type}</code>
+                <span class="text-faded font-body">{desc}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="api" class="mb-16 scroll-mt-24">
+          <h2 class="text-2xl font-heading text-ink mb-4">API Reference</h2>
+          <p class="text-faded font-body mb-4">Freeloader implements the OpenAI API spec. All existing OpenAI SDK calls work unchanged.</p>
+          <div class="space-y-4">
+            {[
+              ['POST', '/v1/chat/completions', 'Chat completions (streaming supported)'],
+              ['POST', '/v1/completions', 'Text completions'],
+              ['GET', '/v1/models', 'List available models'],
+              ['POST', '/v1/embeddings', 'Text embeddings'],
+              ['GET', '/health', 'Health check + current routing status'],
+              ['GET', '/stats', 'Token usage, cost savings, model breakdown'],
+            ].map(([method, path, desc]) => (
+              <div class="flex gap-4 items-start bg-paper border border-kraft rounded-lg p-3 text-sm">
+                <span class={`font-typewriter font-bold shrink-0 ${method === 'POST' ? 'text-marker' : 'text-savings'}`}>{method}</span>
+                <code class="font-typewriter text-stamp shrink-0">{path}</code>
+                <span class="text-faded font-body">{desc}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="trust" class="mb-16 scroll-mt-24">
+          <h2 class="text-2xl font-heading text-ink mb-4">Trust Tiers</h2>
+          <p class="text-faded font-body mb-6">Control where your data goes based on sensitivity.</p>
+          <div class="space-y-4">
+            <div class="border-2 border-savings/30 bg-savings/5 rounded-xl p-5">
+              <div class="flex items-center gap-2 mb-2"><span class="text-xs bg-savings/20 text-savings border border-savings/40 px-2 py-0.5 rounded font-typewriter">open</span><span class="font-heading text-ink">Open Source Models</span></div>
+              <p class="text-faded font-body text-sm">Routes only to fully open-source models (Llama, Mistral, Qwen). Weights are public — no data retention promises needed.</p>
+            </div>
+            <div class="border-2 border-blue-500/30 bg-blue-500/5 rounded-xl p-5">
+              <div class="flex items-center gap-2 mb-2"><span class="text-xs bg-blue-500/20 text-blue-600 border border-blue-500/40 px-2 py-0.5 rounded font-typewriter">standard</span><span class="font-heading text-ink">Standard Providers</span></div>
+              <p class="text-faded font-body text-sm">Includes reputable commercial free tiers (Gemini, Mistral API) with standard data processing agreements.</p>
+            </div>
+            <div class="border-2 border-stamp/30 bg-stamp/5 rounded-xl p-5">
+              <div class="flex items-center gap-2 mb-2"><span class="text-xs bg-stamp/20 text-stamp border border-stamp/40 px-2 py-0.5 rounded font-typewriter">private</span><span class="font-heading text-ink">All Providers</span></div>
+              <p class="text-faded font-body text-sm">No restrictions. Uses any available model including paid commercial APIs when free options are exhausted.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="providers" class="mb-16 scroll-mt-24">
+          <h2 class="text-2xl font-heading text-ink mb-4">Provider Adapters</h2>
+          <p class="text-faded font-body mb-4">Freeloader ships adapters for:</p>
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            {['Google Gemini', 'Groq', 'Together AI', 'Mistral', 'Ollama (local)', 'LM Studio (local)', 'OpenRouter', 'Hugging Face'].map(p => (
+              <div class="bg-paper border border-kraft rounded-lg px-4 py-2.5 flex items-center gap-2">
+                <span class="text-savings text-xs font-typewriter">&#10003;</span>
+                <span class="text-ink font-body">{p}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <Footer client:visible />
+</Base>

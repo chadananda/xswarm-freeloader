@@ -1,50 +1,50 @@
 import Database from 'better-sqlite3';
-import { runMigrations, seedInitialData } from '../../src/database/migrations/migrator.js';
+import { runMigrations } from '../../src/db/migrator.js';
 import {
-  ProviderRepository,
-  ModelRepository,
-  AccountRepository,
-  UsageRepository,
-  BudgetRepository
-} from '../../src/database/repositories/index.js';
+  ProviderRepository, ModelRepository, AccountRepository,
+  AppRepository, UsageRepository, BudgetRepository
+} from '../../src/db/repositories/index.js';
 
-/**
- * Create in-memory test database
- * @returns {object} Database and repositories
- */
-export async function createTestDb() {
+export function createTestDb() {
   const db = new Database(':memory:');
-
-  // Run migrations
-  await runMigrations(db);
-
-  // Seed initial data
-  seedInitialData(db);
-
-  // Create repositories
-  const providers = new ProviderRepository(db);
-  const models = new ModelRepository(db);
-  const accounts = new AccountRepository(db);
-  const usage = new UsageRepository(db);
-  const budgets = new BudgetRepository(db);
+  db.pragma('foreign_keys = ON');
+  runMigrations(db);
 
   return {
     db,
-    providers,
-    models,
-    accounts,
-    usage,
-    budgets,
+    providers: new ProviderRepository(db),
+    models: new ModelRepository(db),
+    accounts: new AccountRepository(db),
+    apps: new AppRepository(db),
+    usage: new UsageRepository(db),
+    budgets: new BudgetRepository(db),
     close: () => db.close()
   };
 }
 
-/**
- * Clean up test database
- * @param {object} testDb - Test database object
- */
-export function cleanupTestDb(testDb) {
-  if (testDb && testDb.db && testDb.db.open) {
-    testDb.db.close();
-  }
+export function seedTestProvider(testDb, id = 'openai') {
+  return testDb.providers.upsert({
+    id,
+    name: 'OpenAI',
+    adapter: 'openai',
+    base_url: 'https://api.openai.com/v1',
+    trust_tier: 'standard'
+  });
+}
+
+export function seedTestModel(testDb, providerId = 'openai') {
+  return testDb.models.upsert({
+    id: `${providerId}/gpt-4o`,
+    provider_id: providerId,
+    name: 'GPT-4o',
+    context_window: 128000,
+    supports_tools: true,
+    supports_vision: true,
+    pricing_input: 2.50,
+    pricing_output: 10.00
+  });
+}
+
+export function seedTestApp(testDb, name = 'test-app') {
+  return testDb.apps.create({ name, trust_tier: 'open' });
 }

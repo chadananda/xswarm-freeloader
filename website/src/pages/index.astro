@@ -1,0 +1,806 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.svelte';
+import Hero from '../components/Hero.svelte';
+import Footer from '../components/Footer.svelte';
+import PaperCard from '../components/PaperCard.astro';
+
+export const prerender = true;
+---
+<Base title="Freeloader — Stop paying for AI you can get for free">
+  <Nav client:load />
+  <Hero client:load />
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION: "The Problem"
+       ═══════════════════════════════════════════════════ -->
+  <section class="relative py-28 px-4">
+    <div class="relative max-w-5xl mx-auto">
+      <div class="text-center mb-16 reveal">
+        <h2 class="font-heading text-3xl sm:text-5xl mb-5">
+          <span class="text-ink">The problem isn't AI.</span><br>
+          <span class="text-coupon">It's paying for it.</span>
+        </h2>
+        <p class="font-typewriter text-ink/70 max-w-2xl mx-auto text-lg">
+          You call GPT-4o. You pay $2.50/M tokens. Meanwhile, Gemini Flash does the same thing for free.
+          So does Groq. So does Cerebras. You just need something that knows this — and knows
+          what to do when free runs out.
+        </p>
+      </div>
+
+      <!-- Visual: Your App → Freeloader → Providers -->
+      <div class="reveal reveal-d1 flex flex-col items-center gap-8 max-w-3xl mx-auto">
+        <!-- Your app card -->
+        <div class="w-full flex justify-center">
+          <div style="transform: rotate(-0.5deg);">
+            <PaperCard color="#f0ebe0">
+              <div class="px-8 py-5 text-center">
+                <div class="font-typewriter text-sm text-faded mb-1">YOUR APP</div>
+                <div class="font-typewriter text-ink/50 text-sm">OPENAI_BASE_URL=<span class="text-coupon">localhost:4011</span></div>
+              </div>
+            </PaperCard>
+          </div>
+        </div>
+
+        <!-- Arrow down -->
+        <div class="w-px h-10 border-l-2 border-ink/30"></div>
+
+        <!-- Freeloader card -->
+        <div class="w-full flex justify-center">
+          <div class="relative" style="transform: rotate(0.3deg);">
+            <PaperCard color="#d8e0d2">
+              <div class="px-10 py-6 text-center">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-savings text-paper text-xs font-heading px-3 py-1 rounded-full tracking-wider" style="box-shadow: 0 2px 4px rgba(0,0,0,0.2);">FREELOADER PROXY</div>
+                <div class="font-typewriter text-sm text-faded mt-2">Checks quotas → routes to cheapest available → falls back automatically</div>
+              </div>
+            </PaperCard>
+          </div>
+        </div>
+
+        <!-- Two-phase fan out -->
+        <div class="flex items-center gap-4 w-full max-w-md">
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-px h-6 border-l-2 border-savings/40"></div>
+            <div class="font-heading text-[0.65rem] text-savings tracking-widest bg-paper px-3 py-1 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact);">1. FREE TIER FIRST</div>
+            <div class="w-px h-4 border-l-2 border-savings/20"></div>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-px h-6 border-l-2 border-stamp/30"></div>
+            <div class="font-heading text-[0.65rem] text-stamp tracking-widest bg-paper px-3 py-1 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact);">2. LOWEST COST NEXT</div>
+            <div class="w-px h-4 border-l-2 border-stamp/20"></div>
+          </div>
+        </div>
+
+        <!-- Provider chips: two rows -->
+        <div class="w-full space-y-4">
+          <!-- Free tier providers -->
+          <div class="grid grid-cols-4 sm:grid-cols-7 gap-3">
+            <div style="transform: rotate(-0.8deg);">
+              <PaperCard color="#d0e0da">
+                <div class="chip-inner">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C12 7.5 7.5 12 2 12C7.5 12 12 16.5 12 22C12 16.5 16.5 12 22 12C16.5 12 12 7.5 12 2Z"/></svg>
+                  <span>Gemini</span>
+                  <div class="font-heading text-[0.55rem] text-savings/70 tracking-wide">FREE</div>
+                </div>
+              </PaperCard>
+            </div>
+            <div style="transform: rotate(0.5deg);">
+              <PaperCard color="#d0e0da">
+                <div class="chip-inner">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z"/></svg>
+                  <span>Groq</span>
+                  <div class="font-heading text-[0.55rem] text-savings/70 tracking-wide">FREE</div>
+                </div>
+              </PaperCard>
+            </div>
+            <div style="transform: rotate(-0.3deg);">
+              <PaperCard color="#d0e0da">
+                <div class="chip-inner">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="3" rx="1.5"/><rect x="6" y="10.5" width="15" height="3" rx="1.5"/><rect x="3" y="17" width="18" height="3" rx="1.5"/></svg>
+                  <span>Mistral</span>
+                  <div class="font-heading text-[0.55rem] text-savings/70 tracking-wide">FREE</div>
+                </div>
+              </PaperCard>
+            </div>
+            <div style="transform: rotate(0.7deg);">
+              <PaperCard color="#d0e0da">
+                <div class="chip-inner">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 12H16M16 12L13 9M16 12L13 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span>OpenRouter</span>
+                  <div class="font-heading text-[0.55rem] text-savings/70 tracking-wide">FREE</div>
+                </div>
+              </PaperCard>
+            </div>
+            <div style="transform: rotate(-0.6deg);">
+              <PaperCard color="#d0e0da">
+                <div class="chip-inner">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><line x1="12" y1="9" x2="6" y2="15" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="9" x2="18" y2="15" stroke="currentColor" stroke-width="1.5"/></svg>
+                  <span>Cerebras</span>
+                  <div class="font-heading text-[0.55rem] text-savings/70 tracking-wide">FREE</div>
+                </div>
+              </PaperCard>
+            </div>
+            <div style="transform: rotate(0.4deg);">
+              <PaperCard color="#d0e0da">
+                <div class="chip-inner">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  <span>SambaNova</span>
+                  <div class="font-heading text-[0.55rem] text-savings/70 tracking-wide">FREE</div>
+                </div>
+              </PaperCard>
+            </div>
+            <div style="transform: rotate(-0.4deg);">
+              <PaperCard color="#d0e0da">
+                <div class="chip-inner">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 4C6.5 4 5 5.5 5 7.5C5 8.5 5.3 9.2 5.8 9.8C4.7 10.8 4 12.3 4 14C4 17 6.5 19.5 9.5 20H14.5C17.5 19.5 20 17 20 14C20 12.3 19.3 10.8 18.2 9.8C18.7 9.2 19 8.5 19 7.5C19 5.5 17.5 4 16 4C15 4 14.2 4.5 13.7 5.3C13.2 5.1 12.6 5 12 5C11.4 5 10.8 5.1 10.3 5.3C9.8 4.5 9 4 8 4Z"/><circle cx="9.5" cy="12" r="1.2" fill="#fffdf7"/><circle cx="14.5" cy="12" r="1.2" fill="#fffdf7"/></svg>
+                  <span>Ollama</span>
+                  <div class="font-heading text-[0.55rem] text-savings/70 tracking-wide">LOCAL</div>
+                </div>
+              </PaperCard>
+            </div>
+          </div>
+          <!-- Budget / paid fallback providers -->
+          <div class="grid grid-cols-4 sm:grid-cols-7 gap-3">
+            <div style="transform: rotate(0.3deg);">
+              <PaperCard color="#e6ddd0">
+                <div class="chip-inner chip-budget">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3"/></svg>
+                  <span>DeepSeek</span>
+                  <div class="font-heading text-[0.55rem] text-stamp/70 tracking-wide">BUDGET</div>
+                </div>
+              </PaperCard>
+            </div>
+            <div style="transform: rotate(-0.5deg);">
+              <PaperCard color="#e6ddd0">
+                <div class="chip-inner chip-budget">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4 8h16M4 12h16M4 16h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+                  <span>Alibaba</span>
+                  <div class="font-heading text-[0.55rem] text-stamp/70 tracking-wide">BUDGET</div>
+                </div>
+              </PaperCard>
+            </div>
+            <div style="transform: rotate(0.4deg);">
+              <PaperCard color="#e6ddd0">
+                <div class="chip-inner chip-budget">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="7" r="2.5"/><circle cx="12" cy="17" r="2.5"/><line x1="7" y1="9.5" x2="12" y2="14.5" stroke="currentColor" stroke-width="1.8"/><line x1="17" y1="9.5" x2="12" y2="14.5" stroke="currentColor" stroke-width="1.8"/><line x1="9.5" y1="7" x2="14.5" y2="7" stroke="currentColor" stroke-width="1.8"/></svg>
+                  <span>Together</span>
+                  <div class="font-heading text-[0.55rem] text-stamp/70 tracking-wide">BUDGET</div>
+                </div>
+              </PaperCard>
+            </div>
+            <div style="transform: rotate(-0.3deg);">
+              <PaperCard color="#e6ddd0">
+                <div class="chip-inner chip-budget">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9zm0 2c3.9 0 7 3.1 7 7s-3.1 7-7 7-7-3.1-7-7 3.1-7 7-7z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  <span>Cohere</span>
+                  <div class="font-heading text-[0.55rem] text-stamp/70 tracking-wide">BUDGET</div>
+                </div>
+              </PaperCard>
+            </div>
+            <!-- Premium fallbacks -->
+            <div style="transform: rotate(0.5deg);">
+              <PaperCard color="#f0ebe0">
+                <div class="chip-inner chip-paid">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5L3.5 7.25V16.75L12 21.5L20.5 16.75V7.25L12 2.5Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="2"/></svg>
+                  <span>OpenAI</span>
+                </div>
+              </PaperCard>
+            </div>
+            <div style="transform: rotate(-0.4deg);">
+              <PaperCard color="#f0ebe0">
+                <div class="chip-inner chip-paid">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L4 21H8.5L10 17H14L15.5 21H20L12 3ZM11 14L12 10.5L13 14H11Z"/></svg>
+                  <span>Anthropic</span>
+                </div>
+              </PaperCard>
+            </div>
+            <div style="transform: rotate(0.6deg);">
+              <PaperCard color="#f0ebe0">
+                <div class="chip-inner chip-paid">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h12v16H6z" fill="none" stroke="currentColor" stroke-width="2" rx="2"/><path d="M9 8h6M9 12h6M9 16h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  <span>+more</span>
+                </div>
+              </PaperCard>
+            </div>
+          </div>
+        </div>
+
+        <p class="font-typewriter text-xs text-ink/40 text-center mt-2">
+          Free tiers first. Then cheapest paid. Premium only as last resort.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION: "The Proof" — pricing cards
+       ═══════════════════════════════════════════════════ -->
+  <section class="relative py-28 px-4">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16 reveal">
+        <h2 class="font-heading text-3xl sm:text-5xl mb-5">
+          <span class="text-ink">Pricing.</span>
+        </h2>
+        <p class="font-typewriter text-faded max-w-2xl mx-auto text-lg">
+          We agonized over this for weeks.
+        </p>
+      </div>
+
+      <!-- Pricing cards -->
+      <div class="pricing-grid grid grid-cols-1 sm:grid-cols-3 gap-8 mb-16 reveal reveal-d1">
+        <!-- Hobby -->
+        <div class="pricing-col" style="transform: rotate(-1deg);">
+          <PaperCard color="#ede5d4" class="h-full">
+            <div class="px-5 py-5 flex flex-col h-full">
+              <div class="font-typewriter text-xs text-faded tracking-wider uppercase mb-4 pb-3" style="border-bottom: 1px solid rgba(180,170,155,0.3);">Hobby</div>
+              <div class="text-center flex-1">
+                <div class="font-heading text-5xl text-savings mb-2">$0</div>
+                <div class="font-typewriter text-xs text-faded mb-4">/mo forever</div>
+                <ul class="text-left space-y-2 font-typewriter text-sm text-faded">
+                  <li>&#10003; 15+ providers, 48+ models</li>
+                  <li>&#10003; Unlimited requests</li>
+                  <li>&#10003; Smart fallbacks</li>
+                  <li>&#10003; Trust tiers</li>
+                  <li>&#10003; Dashboard &amp; reports</li>
+                </ul>
+              </div>
+              <div class="text-center mt-4 pt-3" style="border-top: 1px solid rgba(180,170,155,0.3);">
+                <span class="font-typewriter text-xs text-savings">yes, all of it. for free.</span>
+              </div>
+            </div>
+          </PaperCard>
+        </div>
+
+        <!-- Pro — the joke -->
+        <div class="pricing-col relative" style="transform: rotate(0.5deg);">
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+            <div class="font-heading text-[0.7rem] tracking-widest text-paper bg-savings px-3 py-1 rounded" style="transform: rotate(-2deg); box-shadow: 0 1px 0 0 #1a5e33, 0 2px 4px rgba(0,0,0,0.2);">MOST POPULAR</div>
+          </div>
+          <PaperCard color="#d8e0d2" class="h-full">
+            <div class="px-5 py-5 flex flex-col h-full">
+              <div class="font-typewriter text-xs text-faded tracking-wider uppercase mb-4 pb-3" style="border-bottom: 1px solid rgba(180,170,155,0.3);">Pro</div>
+              <div class="text-center flex-1">
+                <div class="font-heading text-5xl text-savings mb-2">$0</div>
+                <div class="font-typewriter text-xs text-faded mb-6">/mo forever</div>
+                <ul class="text-left space-y-2 font-typewriter text-sm text-faded">
+                  <li>&#10003; Pretty much the same thing</li>
+                </ul>
+              </div>
+              <div class="text-center mt-4 pt-3" style="border-top: 1px solid rgba(180,170,155,0.3);">
+                <span class="font-typewriter text-xs text-savings">we just wanted three columns</span>
+              </div>
+            </div>
+          </PaperCard>
+        </div>
+
+        <!-- Enterprise — the punchline -->
+        <div class="pricing-col" style="transform: rotate(-0.4deg);">
+          <PaperCard color="#e6ddd0" class="h-full">
+            <div class="px-5 py-5 flex flex-col h-full">
+              <div class="font-typewriter text-xs text-faded tracking-wider uppercase mb-4 pb-3" style="border-bottom: 1px solid rgba(180,170,155,0.3);">Enterprise</div>
+              <div class="text-center flex-1">
+                <div class="font-heading text-5xl text-savings mb-2">$0</div>
+                <div class="font-typewriter text-xs text-faded mb-6">/mo forever</div>
+                <ul class="text-left space-y-2 font-typewriter text-sm text-faded">
+                  <li>&#10003; Maybe you're not understanding the concept of <span class="font-heading text-ink">free</span></li>
+                </ul>
+              </div>
+              <div class="text-center mt-4 pt-3" style="border-top: 1px solid rgba(180,170,155,0.3);">
+                <span class="font-typewriter text-xs text-savings">MIT licensed. read it and weep.</span>
+              </div>
+            </div>
+          </PaperCard>
+        </div>
+      </div>
+
+      <!-- Instruction manual -->
+      <div class="reveal reveal-d2 text-center">
+        <div class="inline-block" style="transform: rotate(-0.5deg); min-width: 340px;">
+          <PaperCard color="#f0ebe0">
+            <div class="px-10 py-8 text-center">
+              <div class="font-heading text-sm text-faded tracking-wider uppercase mb-5">Instruction Manual</div>
+              <div class="font-typewriter text-2xl text-ink mb-1">
+                <span class="text-faded">$</span> npx xswarm-freeloader
+              </div>
+              <div class="font-typewriter text-xs text-faded mt-4">that's pretty much it.</div>
+            </div>
+          </PaperCard>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION: "Trust Tiers"
+       ═══════════════════════════════════════════════════ -->
+  <section class="relative py-28 px-4">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16 reveal">
+        <h2 class="font-heading text-3xl sm:text-5xl mb-5">
+          <span class="text-ink">"But what about</span>
+          <span class="text-stamp">my sensitive data?"</span>
+        </h2>
+        <p class="font-typewriter text-faded max-w-2xl mx-auto text-lg">
+          Fair question. Freeloader has trust tiers. Tag your requests
+          and control exactly where your data goes.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 reveal reveal-d1">
+        <!-- OPEN -->
+        <div style="transform: rotate(-0.5deg);">
+          <PaperCard color="#d0e0da">
+            <div class="p-8 pt-6">
+              <div class="h-1 bg-savings rounded-sm mb-5 -mx-8 -mt-6 rounded-t-[3px]"></div>
+              <div class="inline-block font-heading text-[0.7rem] tracking-[0.15em] px-2.5 py-0.5 mb-4 text-savings" style="border: 2px solid rgba(39,134,74,0.5); border-radius: 3px; transform: rotate(-2deg); background: rgba(39,134,74,0.05);">OPEN</div>
+              <h3 class="font-heading text-xl text-ink mb-2">Anything goes</h3>
+              <p class="font-typewriter text-sm text-faded mb-4">
+                Blog posts, summaries, translations — non-sensitive work
+                routed to any provider for maximum free tier coverage.
+              </p>
+              <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="font-typewriter text-[0.7rem] text-faded px-2 py-0.5 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact); background: rgba(0,0,0,0.02);">Gemini</span>
+                <span class="font-typewriter text-[0.7rem] text-faded px-2 py-0.5 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact); background: rgba(0,0,0,0.02);">Groq</span>
+                <span class="font-typewriter text-[0.7rem] text-faded px-2 py-0.5 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact); background: rgba(0,0,0,0.02);">Cerebras</span>
+                <span class="font-typewriter text-[0.7rem] text-faded px-2 py-0.5 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact); background: rgba(0,0,0,0.02);">OpenRouter</span>
+                <span class="font-typewriter text-[0.7rem] text-faded px-2 py-0.5 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact); background: rgba(0,0,0,0.02);">Mistral</span>
+                <span class="font-typewriter text-[0.7rem] text-faded px-2 py-0.5 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact); background: rgba(0,0,0,0.02);">+more</span>
+              </div>
+              <div class="font-heading text-2xl text-savings">All providers</div>
+            </div>
+          </PaperCard>
+        </div>
+
+        <!-- STANDARD -->
+        <div style="transform: rotate(0.3deg);">
+          <PaperCard color="#d2dce4">
+            <div class="p-8 pt-6">
+              <div class="h-1 bg-blue-500 rounded-sm mb-5 -mx-8 -mt-6 rounded-t-[3px]"></div>
+              <div class="inline-block font-heading text-[0.7rem] tracking-[0.15em] px-2.5 py-0.5 mb-4 text-blue-600" style="border: 2px solid rgba(59,130,246,0.5); border-radius: 3px; transform: rotate(-2deg); background: rgba(59,130,246,0.05);">STANDARD</div>
+              <h3 class="font-heading text-xl text-ink mb-2">Trusted providers</h3>
+              <p class="font-typewriter text-sm text-faded mb-4">
+                Customer data, internal tools — routed only to providers
+                with SOC 2 / GDPR compliance. Still mostly free.
+              </p>
+              <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="font-typewriter text-[0.7rem] text-faded px-2 py-0.5 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact); background: rgba(0,0,0,0.02);">Gemini</span>
+                <span class="font-typewriter text-[0.7rem] text-faded px-2 py-0.5 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact); background: rgba(0,0,0,0.02);">Mistral</span>
+                <span class="font-typewriter text-[0.7rem] text-faded px-2 py-0.5 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact); background: rgba(0,0,0,0.02);">OpenAI</span>
+                <span class="font-typewriter text-[0.7rem] text-faded px-2 py-0.5 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact); background: rgba(0,0,0,0.02);">Anthropic</span>
+              </div>
+              <div class="font-heading text-2xl text-blue-600">Trusted only</div>
+            </div>
+          </PaperCard>
+        </div>
+
+        <!-- PRIVATE -->
+        <div style="transform: rotate(-0.3deg);">
+          <PaperCard color="#e4d6d4">
+            <div class="p-8 pt-6">
+              <div class="h-1 bg-stamp rounded-sm mb-5 -mx-8 -mt-6 rounded-t-[3px]"></div>
+              <div class="inline-block font-heading text-[0.7rem] tracking-[0.15em] px-2.5 py-0.5 mb-4 text-stamp" style="border: 2px solid rgba(212,131,26,0.5); border-radius: 3px; transform: rotate(-2deg); background: rgba(212,131,26,0.05);">PRIVATE</div>
+              <h3 class="font-heading text-xl text-ink mb-2">Never leaves your machine</h3>
+              <p class="font-typewriter text-sm text-faded mb-4">
+                PII, medical data, secrets — routed exclusively to local models.
+                Ollama, LM Studio, llamafile. Zero network calls.
+              </p>
+              <div class="flex flex-wrap gap-1.5 mb-4">
+                <span class="font-typewriter text-[0.7rem] text-faded px-2 py-0.5 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact); background: rgba(0,0,0,0.02);">Ollama</span>
+                <span class="font-typewriter text-[0.7rem] text-faded px-2 py-0.5 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact); background: rgba(0,0,0,0.02);">LM Studio</span>
+                <span class="font-typewriter text-[0.7rem] text-faded px-2 py-0.5 rounded" style="box-shadow: var(--shadow-edge), var(--shadow-contact); background: rgba(0,0,0,0.02);">llamafile</span>
+              </div>
+              <div class="font-heading text-2xl text-stamp">Local only</div>
+            </div>
+          </PaperCard>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION: "It Gets Better"
+       ═══════════════════════════════════════════════════ -->
+  <section class="relative py-28 px-4">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16 reveal">
+        <h2 class="font-heading text-3xl sm:text-5xl mb-5">
+          <span class="text-ink">It gets better.</span>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 reveal reveal-d1">
+        <!-- Local LLMs -->
+        <div style="transform: rotate(-0.7deg);">
+          <PaperCard color="#d2dce4">
+            <div class="p-8">
+              <div class="font-typewriter text-xs text-marker tracking-wider uppercase mb-4">LOCAL MODELS</div>
+              <h3 class="font-heading text-2xl text-ink mb-3">
+                Got a GPU? <span class="text-marker">Add it to the mix.</span>
+              </h3>
+              <p class="font-typewriter text-sm text-faded leading-relaxed mb-4">
+                Running Ollama? LM Studio? llamafile? Add them as providers.
+                Freeloader routes to them like any other — except they're
+                free, fast, and <span class="text-stamp font-bold">nothing ever leaves your machine</span>.
+              </p>
+              <div style="transform: rotate(0.3deg);">
+                <PaperCard color="#e6ddd0">
+                  <div class="px-4 py-3 font-typewriter text-sm">
+                    <span class="text-stamp">$</span> <span class="text-faded">ollama pull llama3.2</span><br>
+                    <span class="text-faded/60">// freeloader detects it automatically</span>
+                  </div>
+                </PaperCard>
+              </div>
+            </div>
+          </PaperCard>
+        </div>
+
+        <!-- PDF Reports -->
+        <div style="transform: rotate(0.5deg);">
+          <PaperCard color="#d0e0da">
+            <div class="p-8">
+              <div class="font-typewriter text-xs text-savings tracking-wider uppercase mb-4">REPORTS</div>
+              <h3 class="font-heading text-2xl text-ink mb-3">
+                Show your boss <span class="text-savings">the savings.</span>
+              </h3>
+              <p class="font-typewriter text-sm text-faded leading-relaxed mb-4">
+                Daily email digests and PDF savings reports. Show exactly
+                how much you <em>would have</em> spent vs. what you actually spent.
+                Your finance team will send you a fruit basket.
+              </p>
+              <div class="flex gap-3 flex-wrap">
+                <span class="inline-flex items-center gap-1 bg-savings/10 text-savings text-xs font-typewriter px-3 py-1 rounded-md" style="box-shadow: var(--shadow-edge), var(--shadow-contact);">Daily digests</span>
+                <span class="inline-flex items-center gap-1 bg-savings/10 text-savings text-xs font-typewriter px-3 py-1 rounded-md" style="box-shadow: var(--shadow-edge), var(--shadow-contact);">PDF reports</span>
+                <span class="inline-flex items-center gap-1 bg-savings/10 text-savings text-xs font-typewriter px-3 py-1 rounded-md" style="box-shadow: var(--shadow-edge), var(--shadow-contact);">Cost comparison</span>
+              </div>
+            </div>
+          </PaperCard>
+        </div>
+
+        <!-- All local -->
+        <div style="transform: rotate(0.4deg);">
+          <PaperCard color="#ede5d4">
+            <div class="p-8">
+              <div class="font-typewriter text-xs text-stamp tracking-wider uppercase mb-4">PRIVACY</div>
+              <h3 class="font-heading text-2xl text-ink mb-3">
+                All local. <span class="text-stamp">All yours.</span>
+              </h3>
+              <p class="font-typewriter text-sm text-faded leading-relaxed">
+                SQLite database on your machine. No cloud account.
+                No telemetry. No phone-home. Your API keys, your data,
+                your <code class="font-typewriter text-coupon">~/.xswarm/</code> directory. Runs behind your firewall.
+                Uninstall with one command.
+              </p>
+            </div>
+          </PaperCard>
+        </div>
+
+        <!-- Ecosystem -->
+        <div style="transform: rotate(-0.6deg);">
+          <PaperCard color="#dad4e0">
+            <div class="p-8">
+              <div class="font-typewriter text-xs text-marker tracking-wider uppercase mb-4">ECOSYSTEM</div>
+              <h3 class="font-heading text-2xl text-ink mb-3">
+                Part of <span class="text-marker">xSwarm.</span>
+              </h3>
+              <p class="font-typewriter text-sm text-faded leading-relaxed mb-4">
+                Freeloader is the free tool in the xSwarm family.
+                <a href="https://xswarm.ai" class="text-marker hover:underline">xSwarm</a> manages teams of Claude Code projects with remote monitoring, planning, and reporting.
+                <a href="https://buzz.xswarm.ai" class="text-marker hover:underline">Buzz</a> uses agent swarms for aggressive guerrilla outreach for your SaaS.
+              </p>
+            </div>
+          </PaperCard>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION: "Dead Simple Setup"
+       ═══════════════════════════════════════════════════ -->
+  <section class="relative py-28 px-4">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-16 reveal">
+        <h2 class="font-heading text-3xl sm:text-5xl mb-5">
+          <span class="text-ink">Three steps.</span>
+          <span class="text-savings">Zero dollars.</span>
+        </h2>
+        <p class="font-typewriter text-faded max-w-2xl mx-auto text-lg">
+          Works with every OpenAI SDK. LangChain. Vercel AI. Your own fetch calls.
+          If it speaks OpenAI, it speaks Freeloader.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-start reveal reveal-d1">
+        <!-- Steps -->
+        <div class="space-y-8">
+          <div class="flex gap-5" style="transform: rotate(-0.4deg);">
+            <div class="shrink-0 w-10 h-10 rounded-lg bg-savings/10 flex items-center justify-center font-heading text-savings text-sm" style="box-shadow: var(--shadow-edge), var(--shadow-contact);">1</div>
+            <div>
+              <h3 class="font-heading text-lg text-ink mb-2">Install & run</h3>
+              <div style="transform: rotate(0.2deg);">
+                <PaperCard color="#f0ebe0">
+                  <div class="setup-cmd px-4 py-3 font-typewriter text-sm">
+                    <span class="text-stamp">$</span> <span class="cmd-text text-savings"></span><span class="cmd-cursor">|</span>
+                  </div>
+                </PaperCard>
+              </div>
+              <p class="font-typewriter text-xs text-faded mt-2">Sets up pm2, SQLite DB, syncs 127 models, starts router + dashboard.</p>
+            </div>
+          </div>
+
+          <div class="flex gap-5" style="transform: rotate(0.3deg);">
+            <div class="shrink-0 w-10 h-10 rounded-lg bg-savings/10 flex items-center justify-center font-heading text-savings text-sm" style="box-shadow: var(--shadow-edge), var(--shadow-contact);">2</div>
+            <div>
+              <h3 class="font-heading text-lg text-ink mb-2">Configure free tiers</h3>
+              <div style="transform: rotate(-0.2deg);">
+                <PaperCard color="#f0ebe0">
+                  <div class="px-4 py-3 font-typewriter text-sm">
+                    <span class="text-faded">Dashboard →</span> <span class="text-savings">http://localhost:4010</span>
+                  </div>
+                </PaperCard>
+              </div>
+              <p class="font-typewriter text-xs text-faded mt-2">Add your free-tier API keys for Gemini, Groq, Mistral, and more.</p>
+            </div>
+          </div>
+
+          <div class="flex gap-5" style="transform: rotate(-0.5deg);">
+            <div class="shrink-0 w-10 h-10 rounded-lg bg-savings/10 flex items-center justify-center font-heading text-savings text-sm" style="box-shadow: var(--shadow-edge), var(--shadow-contact);">3</div>
+            <div>
+              <h3 class="font-heading text-lg text-ink mb-2">Point your app</h3>
+              <div style="transform: rotate(0.1deg);">
+                <PaperCard color="#f0ebe0">
+                  <div class="px-4 py-3 font-typewriter text-sm">
+                    <span class="text-faded">OPENAI_BASE_URL=</span><span class="text-savings">http://localhost:4011</span>
+                  </div>
+                </PaperCard>
+              </div>
+              <p class="font-typewriter text-xs text-faded mt-2">That's it. Your existing code stays the same. Your bill doesn't.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code example -->
+        <div style="transform: rotate(1.2deg);">
+          <PaperCard color="#ede5d4">
+            <div class="overflow-hidden">
+              <div class="bg-cream px-5 py-3 font-typewriter text-xs text-faded flex items-center gap-2" style="border-bottom: 1px solid rgba(180,170,155,0.3);">
+                <span class="w-2 h-2 rounded-full bg-savings"></span>
+                app.js — your existing code, unchanged
+              </div>
+              <div class="p-5 font-typewriter text-sm leading-relaxed space-y-1">
+                <div><span class="text-marker">import</span> <span class="text-ink">OpenAI</span> <span class="text-marker">from</span> <span class="text-savings">'openai'</span>;</div>
+                <div>&nbsp;</div>
+                <div><span class="text-marker">const</span> <span class="text-ink">client</span> = <span class="text-marker">new</span> <span class="text-ink">OpenAI</span>({'{'}
+                </div>
+                <div class="pl-4"><span class="text-ink">baseURL:</span> <span class="text-savings">'http://localhost:4011'</span>,</div>
+                <div class="pl-4"><span class="text-ink">apiKey:</span> <span class="text-savings">'free'</span>, <span class="text-faded">// any string works</span></div>
+                <div>{'}'});</div>
+                <div>&nbsp;</div>
+                <div class="text-faded">// asks for gpt-4o, gets Gemini Flash (free)</div>
+                <div><span class="text-marker">const</span> <span class="text-ink">res</span> = <span class="text-marker">await</span> <span class="text-ink">client.chat.completions.create</span>({'{'}
+                </div>
+                <div class="pl-4"><span class="text-ink">model:</span> <span class="text-savings">'gpt-4o'</span>, <span class="text-faded">// aliased to free tier</span></div>
+                <div class="pl-4"><span class="text-ink">messages:</span> <span class="text-ink">[{'{ role: "user", content: "..." }'}]</span></div>
+                <div>{'}'});</div>
+              </div>
+            </div>
+          </PaperCard>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION: Features — clean paper cards
+       ═══════════════════════════════════════════════════ -->
+  <section class="relative py-28 px-4">
+    <div class="max-w-5xl mx-auto">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 reveal" style="padding: 0.5rem;">
+
+        <!-- Feature 1: Free Tier Rotation -->
+        <div style="transform: rotate(-0.8deg);">
+          <PaperCard color="#d0e0da">
+            <div class="p-6">
+              <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-savings/15 mb-4">
+                <span class="font-heading text-savings text-sm">100%</span>
+              </div>
+              <h3 class="font-heading text-lg text-ink mb-1.5">Free Tier Rotation</h3>
+              <p class="font-typewriter text-sm text-faded leading-snug">Rotates requests across Gemini, Groq, Cerebras, Mistral, SambaNova, OpenRouter, and local models — auto-throttling each to stay within free limits.</p>
+            </div>
+          </PaperCard>
+        </div>
+
+        <!-- Feature 2: Smart Fallbacks -->
+        <div style="transform: rotate(0.5deg);">
+          <PaperCard color="#d2dce4">
+            <div class="p-6">
+              <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-savings/15 mb-4">
+                <span class="font-heading text-savings text-sm">$$$</span>
+              </div>
+              <h3 class="font-heading text-lg text-ink mb-1.5">Smart Fallbacks</h3>
+              <p class="font-typewriter text-sm text-faded leading-snug">Circuit breakers, health checks, exponential backoff. If a provider hiccups, your request lands somewhere else in milliseconds.</p>
+            </div>
+          </PaperCard>
+        </div>
+
+        <!-- Feature 3: Dashboard -->
+        <div style="transform: rotate(-0.3deg);">
+          <PaperCard color="#f0ebe0">
+            <div class="p-6">
+              <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-savings/15 mb-4">
+                <span class="font-heading text-savings text-sm">$0</span>
+              </div>
+              <h3 class="font-heading text-lg text-ink mb-1.5">Dashboard</h3>
+              <p class="font-typewriter text-sm text-faded leading-snug">Seven views: live feed, provider health, usage analytics, budget tracking, routing config, opportunities, settings. All local.</p>
+            </div>
+          </PaperCard>
+        </div>
+
+        <!-- Feature 4: Budget Hard Caps -->
+        <div style="transform: rotate(0.7deg);">
+          <PaperCard color="#ede5d4">
+            <div class="p-6">
+              <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-stamp/15 mb-4">
+                <span class="font-heading text-stamp text-sm">CAP</span>
+              </div>
+              <h3 class="font-heading text-lg text-ink mb-1.5">Budget Hard Caps</h3>
+              <p class="font-typewriter text-sm text-faded leading-snug">Set $0/month. Or $5. Or $50. Freeloader enforces it per-app, per-project. Your credit card rests easy.</p>
+            </div>
+          </PaperCard>
+        </div>
+
+        <!-- Feature 5: Local Models -->
+        <div style="transform: rotate(-0.6deg);">
+          <PaperCard color="#dad4e0">
+            <div class="p-6">
+              <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-marker/15 mb-4">
+                <span class="font-heading text-marker text-sm">&#8734;</span>
+              </div>
+              <h3 class="font-heading text-lg text-ink mb-1.5">Local Models</h3>
+              <p class="font-typewriter text-sm text-faded leading-snug">Add any local LLMs — Ollama, LM Studio, llamafile — behind a single router endpoint. Private data never leaves your machine.</p>
+            </div>
+          </PaperCard>
+        </div>
+
+        <!-- Feature 6: Key Sanitization -->
+        <div style="transform: rotate(0.4deg);">
+          <PaperCard color="#e4d6d4">
+            <div class="p-6">
+              <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-savings/15 mb-4">
+                <span class="font-heading text-savings text-xs">600+</span>
+              </div>
+              <h3 class="font-heading text-lg text-ink mb-1.5">Key Sanitization</h3>
+              <p class="font-typewriter text-sm text-faded leading-snug">Every request is scrubbed for 600+ API key patterns using xswarm-ai-sanitize to help prevent accidental secret leakage.</p>
+            </div>
+          </PaperCard>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION: CTA
+       ═══════════════════════════════════════════════════ -->
+  <section class="relative py-28 px-4">
+    <div class="relative max-w-2xl mx-auto text-center reveal">
+      <PaperCard color="#e6ddd0">
+        <div class="px-6 sm:px-10 py-10">
+          <h2 class="font-heading text-3xl sm:text-5xl mb-4">
+            <span class="text-ink">Start saving.</span>
+          </h2>
+          <p class="font-typewriter text-faded mb-8 text-lg max-w-lg mx-auto">
+            New free tiers appear constantly.
+            We'll keep you updated on providers, models, and releases.
+          </p>
+
+          <div class="cta-inner reveal reveal-d1">
+            <div class="flex flex-col sm:flex-row gap-3 mb-4">
+              <input
+                type="email"
+                placeholder="you@example.com"
+                class="flex-1 bg-cream rounded-lg px-5 py-3.5 text-ink placeholder-faded/40 focus:outline-none focus:border-stamp font-typewriter text-sm transition-colors"
+                style="border: none; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(180,170,155,0.25);"
+              />
+              <button class="cta-button font-heading text-sm tracking-wide whitespace-nowrap">
+                Stay updated
+              </button>
+            </div>
+            <p class="font-typewriter text-xs text-faded/60">New providers, free tier changes, and releases. No spam, ever.</p>
+          </div>
+
+          <div class="mt-8 font-typewriter text-sm text-faded/60">
+            Or just run <span class="text-savings">npx xswarm-freeloader</span> right now. It's free. Obviously.
+          </div>
+        </div>
+      </PaperCard>
+    </div>
+  </section>
+
+  <Footer client:visible />
+</Base>
+
+<style is:global>
+  /* Pricing cards equal height */
+  .pricing-col {
+    display: flex;
+    flex-direction: column;
+  }
+  .pricing-col > :global(.paper-card) {
+    flex: 1;
+  }
+
+  /* Provider chip layout */
+  .chip-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.6rem 0.4rem;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.65rem;
+    color: #27864a;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+  .chip-inner.chip-budget {
+    color: #d4831a;
+  }
+  .chip-inner.chip-paid {
+    color: #8b8579;
+  }
+
+  /* CTA inner box */
+  .cta-inner {
+    background: rgba(245, 240, 232, 0.4);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  .cta-button {
+    background: #c0392b;
+    color: #fffdf7;
+    padding: 0.75rem 1.75rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow:
+      0 1px 0 0 #8e2a1f,
+      0 2px 4px rgba(192, 57, 43, 0.25),
+      0 4px 10px rgba(192, 57, 43, 0.15);
+  }
+  .cta-button:hover {
+    background: #a93226;
+    transform: translateY(-1px);
+    box-shadow:
+      0 1px 0 0 #8e2a1f,
+      0 3px 6px rgba(192, 57, 43, 0.3),
+      0 6px 14px rgba(192, 57, 43, 0.2);
+  }
+
+  /* Setup command typing animation */
+  .cmd-text {
+    display: inline;
+  }
+  .cmd-text::after {
+    content: 'npx xswarm-freeloader';
+    animation: type-cmd 2s steps(21) 1s forwards;
+    overflow: hidden;
+    display: inline-block;
+    width: 0;
+    vertical-align: bottom;
+    white-space: nowrap;
+  }
+  .cmd-cursor {
+    animation: blink-cursor 0.7s step-end infinite;
+    color: #2d2a26;
+    font-weight: bold;
+  }
+  @keyframes type-cmd {
+    from { width: 0; }
+    to { width: 21ch; }
+  }
+  @keyframes blink-cursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+</style>

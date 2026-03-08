@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.svelte';
+import Footer from '../../components/Footer.svelte';
+
+const posts = [
+  {
+    slug: 'why-free-ai-tiers-are-better-than-you-think',
+    title: "Why Free AI Tiers Are Better Than You Think",
+    date: '2024-12-01',
+    summary: 'Gemini 2.0 Flash is faster than GPT-4 Turbo was a year ago, and it\'s completely free. We ran the numbers.',
+    readTime: '4 min',
+    tags: ['free tiers', 'benchmarks'],
+  },
+  {
+    slug: 'how-freeloader-routes-your-requests',
+    title: "How Freeloader Routes Your Requests",
+    date: '2024-12-08',
+    summary: 'A deep dive into our routing algorithm: how we pick the right free model for each request, handle fallbacks, and enforce trust tiers.',
+    readTime: '6 min',
+    tags: ['technical', 'routing'],
+  },
+];
+---
+<Base title="Blog — Freeloader" description="AI cost savings, free tier guides, and technical deep-dives.">
+  <Nav client:load />
+  <main class="max-w-3xl mx-auto px-4 pt-28 pb-12">
+    <h1 class="text-3xl font-heading mb-2 text-ink">Blog</h1>
+    <p class="text-faded font-body mb-12">Free AI, demystified.</p>
+    <div class="space-y-8">
+      {posts.map(post => (
+        <article class="bg-paper border border-kraft rounded-xl p-6 hover:border-stamp transition-colors group paper-shadow" style={`transform: rotate(${Math.random() > 0.5 ? '0.3' : '-0.3'}deg);`}>
+          <div class="flex items-center gap-3 mb-3">
+            <time class="text-xs text-faded font-typewriter">{post.date}</time>
+            <span class="text-xs text-kraft">·</span>
+            <span class="text-xs text-faded font-body">{post.readTime} read</span>
+            {post.tags.map(t => (
+              <span class="text-xs bg-cream border border-kraft px-2 py-0.5 rounded text-faded font-typewriter">{t}</span>
+            ))}
+          </div>
+          <h2 class="text-xl font-heading mb-2 text-ink group-hover:text-coupon transition-colors">
+            <a href={`/blog/${post.slug}`}>{post.title}</a>
+          </h2>
+          <p class="text-faded font-body text-sm leading-relaxed">{post.summary}</p>
+          <a href={`/blog/${post.slug}`} class="inline-block mt-4 text-coupon font-body text-sm hover:underline">Read more →</a>
+        </article>
+      ))}
+    </div>
+  </main>
+  <Footer client:visible />
+</Base>

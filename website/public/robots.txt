@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://freeloader.xswarm.ai/sitemap-index.xml

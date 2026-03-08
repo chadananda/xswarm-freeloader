@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!--
+    Paper fiber texture overlay (rougher, sparser).
+    Usage: place over colored layers at low opacity (0.03–0.08).
+    Anisotropic noise stretched vertically to simulate visible paper fibers.
+  -->
+  <filter id="fiber" x="0%" y="0%" width="100%" height="100%">
+    <!-- Stretched noise for directional fibers -->
+    <feTurbulence
+      type="fractalNoise"
+      baseFrequency="0.02 0.15"
+      numOctaves="3"
+      stitchTiles="stitch"
+      seed="42"
+    />
+    <!-- Convert to alpha channel -->
+    <feColorMatrix type="luminanceToAlpha"/>
+    <!-- Threshold to sparse flecks -->
+    <feComponentTransfer>
+      <feFuncA type="discrete" tableValues="0 0 0 0 0 0 0.3 0.6 1"/>
+    </feComponentTransfer>
+  </filter>
+  <rect width="100%" height="100%" filter="url(#fiber)" opacity="0.04"/>
+</svg>

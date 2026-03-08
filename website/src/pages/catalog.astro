@@ -1,0 +1,172 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.svelte';
+import Footer from '../components/Footer.svelte';
+import CatalogCoupons from '../components/CatalogCoupons.svelte';
+
+// Flatten provider catalog into model list with provider info
+function flattenCatalog(catalog: any) {
+  if (!catalog?.providers) return [];
+  return catalog.providers.flatMap((p: any) =>
+    (p.models || []).map((m: any) => ({
+      ...m,
+      provider: p.name,
+      trust_tier: m.trust_tier || p.trust_tier,
+      routing_tier: m.routing_tier || 'budget',
+      is_local: m.is_local || p.is_local || false,
+    }))
+  );
+}
+
+// Fallback — matches default-catalog.json (14 providers, 46 models)
+const FALLBACK_CATALOG = {
+  providers: [
+    {
+      name: 'Google', trust_tier: 'standard',
+      models: [
+        { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', context_window: 1048576, supports_tools: true, supports_vision: true, pricing_input: 1.25, free_tier: true, free_tier_rpm: 5, free_tier_rpd: 25, routing_tier: 'free' },
+        { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', context_window: 1048576, supports_tools: true, supports_vision: true, pricing_input: 0.15, free_tier: true, free_tier_rpm: 15, free_tier_rpd: 1500, routing_tier: 'free' },
+        { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', context_window: 1048576, supports_tools: true, supports_vision: true, pricing_input: 0.10, free_tier: true, free_tier_rpm: 15, free_tier_rpd: 1500, routing_tier: 'free' },
+        { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash Lite', context_window: 1048576, supports_tools: true, supports_vision: true, pricing_input: 0.075, free_tier: true, free_tier_rpm: 30, free_tier_rpd: 1500, routing_tier: 'free' },
+      ],
+    },
+    {
+      name: 'Groq', trust_tier: 'standard',
+      models: [
+        { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B Versatile', context_window: 128000, supports_tools: true, supports_vision: false, pricing_input: 0.59, free_tier: true, free_tier_rpm: 30, free_tier_rpd: 14400, free_tier_tpd: 500000, routing_tier: 'free' },
+        { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B Instant', context_window: 128000, supports_tools: true, supports_vision: false, pricing_input: 0.05, free_tier: true, free_tier_rpm: 30, free_tier_rpd: 14400, routing_tier: 'free' },
+        { id: 'mixtral-8x7b-32768', name: 'Mixtral 8x7B', context_window: 32768, supports_tools: true, supports_vision: false, pricing_input: 0.24, free_tier: true, free_tier_rpm: 30, free_tier_rpd: 14400, routing_tier: 'free' },
+        { id: 'gemma2-9b-it', name: 'Gemma 2 9B', context_window: 8192, supports_tools: true, supports_vision: false, pricing_input: 0.20, free_tier: true, free_tier_rpm: 30, free_tier_rpd: 14400, routing_tier: 'free' },
+      ],
+    },
+    {
+      name: 'Cerebras', trust_tier: 'open',
+      models: [
+        { id: 'llama-3.3-70b', name: 'Llama 3.3 70B', context_window: 128000, supports_tools: true, supports_vision: false, pricing_input: 0, free_tier: true, free_tier_rpm: 30, free_tier_rpd: 1000, routing_tier: 'free' },
+        { id: 'llama-3.1-8b', name: 'Llama 3.1 8B', context_window: 128000, supports_tools: true, supports_vision: false, pricing_input: 0, free_tier: true, free_tier_rpm: 30, free_tier_rpd: 1000, routing_tier: 'free' },
+      ],
+    },
+    {
+      name: 'SambaNova', trust_tier: 'open',
+      models: [
+        { id: 'Meta-Llama-3.3-70B-Instruct', name: 'Llama 3.3 70B', context_window: 128000, supports_tools: true, supports_vision: false, pricing_input: 0, free_tier: true, free_tier_rpm: 10, free_tier_rpd: 100, routing_tier: 'free' },
+        { id: 'Meta-Llama-3.1-8B-Instruct', name: 'Llama 3.1 8B', context_window: 128000, supports_tools: true, supports_vision: false, pricing_input: 0, free_tier: true, free_tier_rpm: 10, free_tier_rpd: 100, routing_tier: 'free' },
+        { id: 'DeepSeek-R1', name: 'DeepSeek R1', context_window: 65536, supports_tools: false, supports_vision: false, pricing_input: 0, free_tier: true, free_tier_rpm: 5, free_tier_rpd: 50, routing_tier: 'free' },
+      ],
+    },
+    {
+      name: 'Mistral', trust_tier: 'open',
+      models: [
+        { id: 'mistral-small-latest', name: 'Mistral Small', context_window: 131072, supports_tools: true, supports_vision: false, pricing_input: 0.20, free_tier: true, free_tier_rpm: 1, free_tier_rpd: 500, routing_tier: 'free' },
+        { id: 'open-mistral-nemo', name: 'Mistral NeMo', context_window: 131072, supports_tools: true, supports_vision: false, pricing_input: 0.10, free_tier: true, free_tier_rpm: 1, free_tier_rpd: 500, routing_tier: 'free' },
+        { id: 'pixtral-large-latest', name: 'Pixtral Large', context_window: 131072, supports_tools: true, supports_vision: true, pricing_input: 2.00, free_tier: true, free_tier_rpm: 1, free_tier_rpd: 500, routing_tier: 'free' },
+        { id: 'mistral-large-latest', name: 'Mistral Large', context_window: 131072, supports_tools: true, supports_vision: true, pricing_input: 2.00, free_tier: false, routing_tier: 'premium' },
+        { id: 'codestral-latest', name: 'Codestral', context_window: 262144, supports_tools: true, supports_vision: false, pricing_input: 0.30, free_tier: false, routing_tier: 'budget' },
+      ],
+    },
+    {
+      name: 'OpenRouter', trust_tier: 'standard',
+      models: [
+        { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Llama 3.3 70B (Free)', context_window: 131072, supports_tools: true, supports_vision: false, pricing_input: 0, free_tier: true, free_tier_rpm: 20, free_tier_rpd: 200, routing_tier: 'free' },
+        { id: 'google/gemini-2.0-flash-exp:free', name: 'Gemini 2.0 Flash (Free)', context_window: 1048576, supports_tools: true, supports_vision: true, pricing_input: 0, free_tier: true, free_tier_rpm: 20, free_tier_rpd: 200, routing_tier: 'free' },
+        { id: 'deepseek/deepseek-r1:free', name: 'DeepSeek R1 (Free)', context_window: 163840, supports_tools: false, supports_vision: false, pricing_input: 0, free_tier: true, free_tier_rpm: 20, free_tier_rpd: 200, routing_tier: 'free' },
+        { id: 'qwen/qwen-2.5-72b-instruct:free', name: 'Qwen 2.5 72B (Free)', context_window: 131072, supports_tools: false, supports_vision: false, pricing_input: 0, free_tier: true, free_tier_rpm: 20, free_tier_rpd: 200, routing_tier: 'free' },
+        { id: 'mistralai/mistral-7b-instruct:free', name: 'Mistral 7B (Free)', context_window: 32768, supports_tools: false, supports_vision: false, pricing_input: 0, free_tier: true, free_tier_rpm: 20, free_tier_rpd: 200, routing_tier: 'free' },
+        { id: 'microsoft/phi-3-mini-128k-instruct:free', name: 'Phi-3 Mini (Free)', context_window: 128000, supports_tools: false, supports_vision: false, pricing_input: 0, free_tier: true, free_tier_rpm: 20, free_tier_rpd: 200, routing_tier: 'free' },
+      ],
+    },
+    {
+      name: 'Cohere', trust_tier: 'standard',
+      models: [
+        { id: 'command-r-plus', name: 'Command R+', context_window: 128000, supports_tools: true, supports_vision: false, pricing_input: 2.50, free_tier: true, free_tier_rpm: 10, free_tier_rpd: 1000, routing_tier: 'free' },
+        { id: 'command-r', name: 'Command R', context_window: 128000, supports_tools: true, supports_vision: false, pricing_input: 0.15, free_tier: true, free_tier_rpm: 10, free_tier_rpd: 1000, routing_tier: 'free' },
+      ],
+    },
+    {
+      name: 'Ollama (Local)', trust_tier: 'open',
+      models: [
+        { id: 'ollama-local', name: 'Local Models (Ollama)', context_window: 128000, supports_tools: true, supports_vision: false, pricing_input: 0, free_tier: true, is_local: true, routing_tier: 'free' },
+      ],
+    },
+    {
+      name: 'DeepSeek', trust_tier: 'standard',
+      models: [
+        { id: 'deepseek-chat', name: 'DeepSeek Chat (V3)', context_window: 65536, supports_tools: true, supports_vision: false, pricing_input: 0.27, free_tier: false, routing_tier: 'budget' },
+        { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner (R1)', context_window: 65536, supports_tools: false, supports_vision: false, pricing_input: 0.55, free_tier: false, routing_tier: 'budget' },
+      ],
+    },
+    {
+      name: 'Alibaba Cloud', trust_tier: 'standard',
+      models: [
+        { id: 'qwen-turbo', name: 'Qwen-Turbo', context_window: 131072, supports_tools: true, supports_vision: false, pricing_input: 0.20, free_tier: false, routing_tier: 'budget' },
+        { id: 'qwen-plus', name: 'Qwen-Plus', context_window: 131072, supports_tools: true, supports_vision: true, pricing_input: 0.80, free_tier: false, routing_tier: 'budget' },
+        { id: 'qwen-max', name: 'Qwen-Max', context_window: 131072, supports_tools: true, supports_vision: true, pricing_input: 2.40, free_tier: false, routing_tier: 'budget' },
+      ],
+    },
+    {
+      name: 'Fireworks AI', trust_tier: 'standard',
+      models: [
+        { id: 'llama-v3p3-70b-instruct', name: 'Llama 3.3 70B', context_window: 131072, supports_tools: true, supports_vision: false, pricing_input: 0.90, free_tier: false, routing_tier: 'budget' },
+        { id: 'mixtral-8x22b-instruct', name: 'Mixtral 8x22B MoE', context_window: 65536, supports_tools: true, supports_vision: false, pricing_input: 0.90, free_tier: false, routing_tier: 'budget' },
+      ],
+    },
+    {
+      name: 'Together AI', trust_tier: 'standard',
+      models: [
+        { id: 'llama-3.3-70b-turbo', name: 'Llama 3.3 70B Turbo', context_window: 131072, supports_tools: true, supports_vision: false, pricing_input: 0.88, free_tier: false, routing_tier: 'budget' },
+        { id: 'qwen2.5-72b-turbo', name: 'Qwen 2.5 72B Turbo', context_window: 131072, supports_tools: true, supports_vision: false, pricing_input: 1.20, free_tier: false, routing_tier: 'budget' },
+      ],
+    },
+    {
+      name: 'OpenAI', trust_tier: 'standard',
+      models: [
+        { id: 'gpt-4o', name: 'GPT-4o', context_window: 128000, supports_tools: true, supports_vision: true, pricing_input: 2.50, free_tier: false, routing_tier: 'premium' },
+        { id: 'gpt-4o-mini', name: 'GPT-4o Mini', context_window: 128000, supports_tools: true, supports_vision: true, pricing_input: 0.15, free_tier: false, routing_tier: 'premium' },
+        { id: 'gpt-4.1-nano', name: 'GPT-4.1 Nano', context_window: 1047576, supports_tools: true, supports_vision: true, pricing_input: 0.10, free_tier: false, routing_tier: 'premium' },
+      ],
+    },
+    {
+      name: 'Inception Labs', trust_tier: 'standard',
+      models: [
+        { id: 'mercury-2', name: 'Mercury 2', context_window: 128000, supports_tools: true, supports_vision: false, pricing_input: 0.25, free_tier: false, routing_tier: 'budget' },
+        { id: 'mercury-coder', name: 'Mercury Coder', context_window: 128000, supports_tools: true, supports_vision: false, pricing_input: 0.25, free_tier: false, routing_tier: 'budget' },
+      ],
+    },
+    {
+      name: 'Anthropic', trust_tier: 'standard',
+      models: [
+        { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', context_window: 200000, supports_tools: true, supports_vision: true, pricing_input: 3.00, free_tier: false, routing_tier: 'premium' },
+        { id: 'claude-haiku-4-5', name: 'Claude Haiku 4.5', context_window: 200000, supports_tools: true, supports_vision: true, pricing_input: 0.80, free_tier: false, routing_tier: 'premium' },
+      ],
+    },
+  ],
+};
+
+let models = flattenCatalog(FALLBACK_CATALOG);
+try {
+  const res = await fetch('https://catalog.freeloader.xswarm.ai/catalog.json', { signal: AbortSignal.timeout(3000) });
+  if (res.ok) {
+    const data = await res.json();
+    const flattened = flattenCatalog(data);
+    if (flattened.length) models = flattened;
+  }
+} catch {
+  // use fallback
+}
+---
+<Base title="Model Catalog — Freeloader" description="Browse free tier AI models available through Freeloader.">
+  <Nav client:load />
+  <main class="max-w-6xl mx-auto px-4 pt-28 pb-12">
+    <div class="mb-10">
+      <h1 class="font-heading text-3xl sm:text-5xl mb-4">
+        Free Tier <span class="text-coupon">Coupon Book</span>
+      </h1>
+      <p class="font-typewriter text-faded max-w-2xl text-lg">
+        {models.length} models from {new Set(models.map((m: any) => m.provider)).size} providers, sorted cheapest first.
+        Freeloader exhausts the <span class="text-savings font-heading">$0</span> ones before touching anything that costs money.
+      </p>
+    </div>
+    <CatalogCoupons models={models} client:load />
+  </main>
+  <Footer client:visible />
+</Base>

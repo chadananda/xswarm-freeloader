@@ -1,0 +1,75 @@
+---
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.svelte';
+import { getUser } from '../../lib/auth';
+import { getDb } from '../../lib/db';
+
+const user = await getUser(Astro.cookies);
+const adminEmail = import.meta.env.SITE_ADMIN_EMAIL;
+if (!user || user.email !== adminEmail) {
+  return Astro.redirect('/?error=unauthorized');
+}
+
+const db = getDb();
+const [usersResult, weekResult, sequencesResult] = await Promise.all([
+  db.execute('SELECT COUNT(*) as total FROM users'),
+  db.execute("SELECT COUNT(*) as week FROM users WHERE created_at > datetime('now', '-7 days')"),
+  db.execute("SELECT sequence_name, step, COUNT(*) as count FROM email_sequences GROUP BY sequence_name, step ORDER BY sequence_name, step"),
+]);
+
+const totalUsers = Number(usersResult.rows[0]?.total ?? 0);
+const weekSignups = Number(weekResult.rows[0]?.week ?? 0);
+const seqStats = sequencesResult.rows;
+---
+<Base title="Admin — Freeloader">
+  <Nav client:load />
+  <main class="max-w-4xl mx-auto px-4 pt-28 pb-12">
+    <div class="flex items-center justify-between mb-10">
+      <h1 class="text-3xl font-heading">Admin <span class="text-stamp">Dashboard</span></h1>
+      <span class="text-xs font-typewriter text-faded bg-cream border border-kraft px-3 py-1 rounded">{user.email}</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
+      <div class="bg-paper border border-kraft rounded-xl p-5">
+        <div class="text-faded text-xs font-typewriter mb-1">Total Users</div>
+        <div class="text-4xl font-heading text-ink">{totalUsers}</div>
+      </div>
+      <div class="bg-paper border border-kraft rounded-xl p-5">
+        <div class="text-faded text-xs font-typewriter mb-1">This Week</div>
+        <div class="text-4xl font-heading text-savings">+{weekSignups}</div>
+      </div>
+      <div class="bg-paper border border-kraft rounded-xl p-5">
+        <div class="text-faded text-xs font-typewriter mb-1">Emails Sent</div>
+        <div class="text-4xl font-heading text-stamp">{seqStats.reduce((s, r) => s + Number(r.count), 0)}</div>
+      </div>
+    </div>
+
+    <!-- Email Sequences -->
+    <div class="bg-paper border border-kraft rounded-xl p-6">
+      <h2 class="font-heading mb-4 text-ink">Email Sequences</h2>
+      {seqStats.length === 0 ? (
+        <p class="text-faded text-sm font-typewriter">No emails sent yet.</p>
+      ) : (
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-kraft">
+              <th class="text-left pb-3 text-faded font-typewriter font-normal">Sequence</th>
+              <th class="text-left pb-3 text-faded font-typewriter font-normal">Step (day)</th>
+              <th class="text-right pb-3 text-faded font-typewriter font-normal">Sent</th>
+            </tr>
+          </thead>
+          <tbody>
+            {seqStats.map(row => (
+              <tr class="border-b border-kraft/50">
+                <td class="py-3 font-typewriter text-stamp">{row.sequence_name}</td>
+                <td class="py-3 text-faded font-typewriter">Day {row.step}</td>
+                <td class="py-3 text-right text-ink font-heading">{row.count}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  </main>
+</Base>

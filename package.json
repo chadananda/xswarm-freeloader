@@ -1,19 +1,21 @@
 {
   "name": "xswarm-freeloader",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Intelligent AI router that maximizes free tier usage across 100+ LLM providers",
   "type": "module",
-  "main": "src/server/index.js",
+  "main": "src/router/server.js",
   "bin": {
-    "xswarm": "src/bin/xswarm.js"
+    "xswarm-freeloader": "src/bin/cli.js"
   },
   "scripts": {
-    "start": "node src/server/index.js",
-    "dev": "node --watch src/server/index.js",
-    "test": "vitest",
+    "start": "node src/router/server.js",
+    "dev": "node --watch src/router/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
-    "postinstall": "node scripts/postinstall.js"
+    "dashboard:dev": "cd src/dashboard && npx vite dev",
+    "dashboard:build": "cd src/dashboard && npx vite build"
   },
   "keywords": [
     "ai",
@@ -22,35 +24,41 @@
     "free-tier",
     "anthropic",
     "openai",
-    "cost-optimization"
+    "cost-optimization",
+    "xswarm"
   ],
   "author": "",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chadananda/xswarm-llm-freeloader.git"
+    "url": "git+https://github.com/chadananda/xswarm-freeloader.git"
   },
   "bugs": {
-    "url": "https://github.com/chadananda/xswarm-llm-freeloader/issues"
+    "url": "https://github.com/chadananda/xswarm-freeloader/issues"
   },
-  "homepage": "https://github.com/chadananda/xswarm-llm-freeloader#readme",
+  "homepage": "https://github.com/chadananda/xswarm-freeloader#readme",
   "dependencies": {
     "fastify": "^5.2.0",
     "@fastify/cors": "^10.0.1",
     "@fastify/static": "^8.0.2",
     "better-sqlite3": "^11.9.1",
-    "commander": "^12.1.0",
-    "js-yaml": "^4.1.0",
     "zod": "^3.24.1",
     "pino": "^9.6.0",
     "pino-pretty": "^11.0.0",
-    "undici": "^7.2.0"
+    "xswarm-ai-sanitize": "^1.0.0",
+    "nodemailer": "^6.9.0",
+    "bcrypt": "^5.1.0",
+    "jsonwebtoken": "^9.0.0"
   },
   "devDependencies": {
     "vitest": "^2.1.8",
     "@vitest/ui": "^2.1.8",
     "@vitest/coverage-v8": "^2.1.8",
-    "eslint": "^9.18.0"
+    "eslint": "^9.18.0",
+    "svelte": "^5.0.0",
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "tailwindcss": "^4.0.0",
+    "vite": "^6.0.0"
   },
   "engines": {
     "node": ">=18.0.0",

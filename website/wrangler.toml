@@ -1,0 +1,8 @@
+name = "xswarm-freeloader"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "./dist"
+
+[vars]
+SITE_ADMIN_EMAIL = ""
+# Set these as secrets via: wrangler pages secret put <NAME> --project-name=falling-star-350f
+# RESEND_API_KEY, TURSO_DATABASE_URL, TURSO_AUTH_TOKEN, JWT_SECRET, CRON_SECRET

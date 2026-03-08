@@ -1,0 +1,77 @@
+---
+export const prerender = true;
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.svelte';
+import Footer from '../../components/Footer.svelte';
+
+export async function getStaticPaths() {
+  return [
+    {
+      params: { slug: 'why-free-ai-tiers-are-better-than-you-think' },
+      props: {
+        title: 'Why Free AI Tiers Are Better Than You Think',
+        date: '2024-12-01',
+        readTime: '4 min',
+        content: `
+          <p>Last year, GPT-4 was the undisputed king of language models. You paid $30 per million tokens, and that was the price of quality.</p>
+          <p>Then Google released Gemini 2.0 Flash. Free. Unlimited (within daily caps that most developers never hit). And benchmarks show it matching or beating GPT-4 Turbo on most real-world tasks.</p>
+          <h2>The free tier landscape has changed</h2>
+          <p>When we catalogued available free tier models for Freeloader, we found 127 of them. Not toy models — production-grade LLMs from Google, Meta, Mistral, and others, all available for zero dollars.</p>
+          <p>Here's what blew us away: the quality floor has risen dramatically. Llama 3.3 70B on Groq is fast, accurate, and free up to 14,400 requests/day. For most indie projects, that's effectively unlimited.</p>
+          <h2>The catch nobody talks about</h2>
+          <p>Free tiers have rate limits. Hit Gemini too hard and you get 429s. The trick is spreading load across providers automatically — which is exactly what Freeloader does.</p>
+          <h2>The math</h2>
+          <p>If you're doing 1M tokens/day: at GPT-4o prices that's $2.50/day or $75/month. Through Freeloader, routing to free tiers: $0.</p>
+          <p>That's not a rounding error. That's your entire AI budget, eliminated.</p>
+        `,
+      },
+    },
+    {
+      params: { slug: 'how-freeloader-routes-your-requests' },
+      props: {
+        title: 'How Freeloader Routes Your Requests',
+        date: '2024-12-08',
+        readTime: '6 min',
+        content: `
+          <p>When a request hits Freeloader's proxy, a lot happens in milliseconds before a single token is generated. Here's the full picture.</p>
+          <h2>Step 1: Trust tier check</h2>
+          <p>Every request is evaluated against its trust tier header (or the global default). If a prompt is tagged private, it will never leave your infrastructure — only local Ollama models qualify.</p>
+          <h2>Step 2: Budget gate</h2>
+          <p>If your monthly budget is $0 (the default), any provider that charges money is immediately excluded from the candidate list. No exceptions.</p>
+          <h2>Step 3: Model selection</h2>
+          <p>From the remaining candidates, we score models by: current rate limit headroom (prefer models with capacity), latency (prefer faster models for short prompts), and capability match (use context window and feature flags to filter).</p>
+          <h2>Step 4: Fallback chain</h2>
+          <p>If the primary model fails or rate-limits, Freeloader automatically retries with the next candidate — transparent to your application. You never see a 429.</p>
+          <h2>Step 5: Response normalization</h2>
+          <p>Different providers return subtly different response shapes. Freeloader normalizes everything to the OpenAI format before returning it to your app.</p>
+        `,
+      },
+    },
+  ];
+}
+
+const { slug } = Astro.params;
+const { title, date, readTime, content } = Astro.props;
+---
+<Base title={`${title} — Freeloader Blog`}>
+  <Nav client:load />
+  <main class="max-w-2xl mx-auto px-4 pt-28 pb-12">
+    <div class="mb-8">
+      <div class="flex items-center gap-3 mb-4">
+        <a href="/blog" class="text-faded hover:text-ink text-sm font-body transition-colors">← Blog</a>
+        <span class="text-kraft">·</span>
+        <time class="text-faded text-sm font-typewriter">{date}</time>
+        <span class="text-kraft">·</span>
+        <span class="text-faded text-sm font-body">{readTime} read</span>
+      </div>
+      <h1 class="text-3xl font-heading leading-tight text-ink">{title}</h1>
+    </div>
+    <div class="prose prose-sm max-w-none prose-headings:text-ink prose-headings:font-heading prose-p:text-faded prose-p:font-body prose-p:leading-relaxed prose-a:text-coupon" set:html={content} />
+    <div class="mt-16 pt-8 border-t-2 border-kraft">
+      <h3 class="font-heading text-ink mb-3">Ready to stop paying for AI?</h3>
+      <div class="bg-paper border-2 border-dashed border-kraft rounded-lg p-4 font-typewriter text-sm text-savings mb-4">npx xswarm-freeloader</div>
+      <a href="/" class="text-coupon font-body hover:underline text-sm">Get free access →</a>
+    </div>
+  </main>
+  <Footer client:visible />
+</Base>

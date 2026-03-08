@@ -1,7 +1,3 @@
-/**
- * Custom error classes for xSwarm-Freeloader
- */
-
 export class BudgetExceededError extends Error {
   constructor(message, period, spent, limit) {
     super(message);
@@ -9,7 +5,7 @@ export class BudgetExceededError extends Error {
     this.period = period;
     this.spent = spent;
     this.limit = limit;
-    this.statusCode = 400;
+    this.statusCode = 429;
   }
 }
 
@@ -48,11 +44,28 @@ export class ConfigurationError extends Error {
   }
 }
 
-export class LiteLLMError extends Error {
-  constructor(message, details) {
+export class ProviderError extends Error {
+  constructor(message, provider, statusCode = 502) {
     super(message);
-    this.name = 'LiteLLMError';
-    this.details = details;
-    this.statusCode = 500;
+    this.name = 'ProviderError';
+    this.provider = provider;
+    this.statusCode = statusCode;
+  }
+}
+
+export class AuthenticationError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'AuthenticationError';
+    this.statusCode = 401;
+  }
+}
+
+export class CircuitBreakerOpenError extends Error {
+  constructor(provider) {
+    super(`Circuit breaker open for provider: ${provider}`);
+    this.name = 'CircuitBreakerOpenError';
+    this.provider = provider;
+    this.statusCode = 503;
   }
 }

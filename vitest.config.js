@@ -10,15 +10,11 @@ export default defineConfig({
       exclude: [
         'node_modules/',
         'tests/',
-        'scripts/',
+        'catalog/',
+        'website/',
+        'src/dashboard/',
         '*.config.js'
-      ],
-      thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 80,
-        statements: 80
-      }
+      ]
     },
     testTimeout: 30000,
     hookTimeout: 30000

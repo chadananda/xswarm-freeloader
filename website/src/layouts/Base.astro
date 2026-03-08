@@ -1,0 +1,107 @@
+---
+export interface Props {
+  title?: string;
+  description?: string;
+}
+const { title = 'Freeloader — Stop paying for AI', description = 'Drop-in OpenAI proxy that exhausts every free tier before spending a cent. 15 providers, 48 models, $0/month.' } = Astro.props;
+const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://freeloader.xswarm.ai');
+---
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonicalURL.href} />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <link rel="canonical" href={canonicalURL.href} />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preload" href="/fonts/permanent-marker-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/special-elite-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <style is:global>
+    @font-face {
+      font-family: 'Permanent Marker';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/fonts/permanent-marker-latin.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Source Sans 3';
+      font-style: normal;
+      font-weight: 300 700;
+      font-display: swap;
+      src: url('/fonts/source-sans-3-latin.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Special Elite';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/fonts/special-elite-latin.woff2') format('woff2');
+    }
+
+    :root {
+      --page-bg: #ede8df;
+      /* Shared SVG noise textures — used by Nav, Footer, Hero, PaperCard, CatalogCoupons */
+      --noise-fine: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23a)' opacity='.4'/%3E%3C/svg%3E");
+      --noise-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.12' numOctaves='2' stitchTiles='stitch' seed='11'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)' opacity='.12'/%3E%3C/svg%3E");
+      --grain-url: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='5' stitchTiles='stitch' seed='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.08'/%3E%3C/svg%3E");
+      /* Paper surface composites */
+      --paper-surface: var(--noise-fine), linear-gradient(155deg, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.04) 100%);
+      --shadow-edge: 0 0.5px 0.5px rgba(30,20,10,0.12), 0 1px 2px rgba(30,20,10,0.08), 0 2px 4px rgba(30,20,10,0.04);
+      --shadow-contact: inset 1px 1px 0 rgba(255,255,255,0.25), inset -1px -1px 0 rgba(0,0,0,0.06);
+    }
+
+    body {
+      background-color: var(--page-bg);
+      background-image: var(--grain-url);
+      background-size: 256px 256px;
+      background-repeat: repeat;
+      background-blend-mode: multiply;
+    }
+
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-d1 { transition-delay: 0.1s; }
+    .reveal-d2 { transition-delay: 0.2s; }
+    .font-typewriter { text-shadow: 0 1px 0 rgba(255,255,255,0.5); }
+    .font-heading { text-shadow: -1px 0 0 rgba(255,255,255,0.25), 1px 0 0 rgba(0,0,0,0.08); }
+    ::selection { background: rgba(192,57,43,0.2); color: #2d2a26; }
+  </style>
+  <!-- Cloudflare Web Analytics — replace token with your real CF analytics token -->
+  <!-- <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "YOUR_CF_TOKEN"}'></script> -->
+  {posthogKey && (
+    <script define:vars={{ posthogKey }}>
+      !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]);t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+      posthog.init(posthogKey, {api_host:'https://app.posthog.com'});
+    </script>
+  )}
+</head>
+<body class="min-h-screen font-body text-ink" style="background-color: var(--page-bg);">
+  <svg class="sr-only" aria-hidden="true">
+    <defs>
+      <filter id="herocut" x="-2%" y="-2%" width="104%" height="104%"><feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="4" seed="3" result="warp"/><feDisplacementMap in="SourceGraphic" in2="warp" scale="2" xChannelSelector="R" yChannelSelector="G"/></filter>
+      <filter id="navcut" x="-1%" y="-1%" width="102%" height="103%"><feTurbulence type="turbulence" baseFrequency="0.03" numOctaves="4" seed="5" result="warp"/><feDisplacementMap in="SourceGraphic" in2="warp" scale="1.5" xChannelSelector="R" yChannelSelector="G"/></filter>
+      <filter id="footercut" x="-1%" y="-1%" width="102%" height="103%"><feTurbulence type="turbulence" baseFrequency="0.03" numOctaves="4" seed="7" result="warp"/><feDisplacementMap in="SourceGraphic" in2="warp" scale="1.5" xChannelSelector="R" yChannelSelector="G"/></filter>
+      <filter id="papercut" x="-2%" y="-2%" width="104%" height="104%"><feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="4" seed="3" result="warp"/><feDisplacementMap in="SourceGraphic" in2="warp" scale="2" xChannelSelector="R" yChannelSelector="G"/></filter>
+      <filter id="couponcut" x="-2%" y="-2%" width="104%" height="104%"><feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="4" seed="7" result="warp"/><feDisplacementMap in="SourceGraphic" in2="warp" scale="2" xChannelSelector="R" yChannelSelector="G"/></filter>
+    </defs>
+  </svg>
+  <slot />
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

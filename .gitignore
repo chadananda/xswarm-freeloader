@@ -41,3 +41,16 @@ coverage/
 
 # User data directory (not committed)
 .xswarm/
+
+# Dashboard build output
+src/dashboard/dist/
+
+# Catalog/Website outputs
+catalog/.wrangler/
+website/.astro/
+website/dist/
+website/test-results/
+
+# Screenshot artifacts
+scripts/*.png
+website/screenshots/
