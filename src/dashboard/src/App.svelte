@@ -7,12 +7,13 @@
   import Overview from './views/Overview.svelte'
   import Providers from './views/Providers.svelte'
   import Apps from './views/Apps.svelte'
+  import Accounts from './views/Accounts.svelte'
   import Routing from './views/Routing.svelte'
   import Usage from './views/Usage.svelte'
   import Opportunities from './views/Opportunities.svelte'
   import Settings from './views/Settings.svelte'
 
-  const views = { Login, Overview, Providers, Apps, Routing, Usage, Opportunities, Settings }
+  const views = { Login, Overview, Providers, Apps, Accounts, Routing, Usage, Opportunities, Settings }
 
   let auth = $state(false)
   let view = $state('Overview')

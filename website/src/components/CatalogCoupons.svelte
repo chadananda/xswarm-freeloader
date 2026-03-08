@@ -22,6 +22,10 @@
     'Ollama (Local)':  { paper: '#f2ebfa', accent: '#9333ea', variant: 7 },
     'xAI':             { paper: '#f0f0f0', accent: '#1a1a1a', variant: 0 },
     'Inception Labs':  { paper: '#e8f5f0', accent: '#0a9e6f', variant: 2 },
+    'NVIDIA NIM':          { paper: '#e8f5e9', accent: '#76b900', variant: 1 },
+    'GitHub Models':       { paper: '#e8e8e8', accent: '#24292e', variant: 3 },
+    'Cloudflare Workers AI': { paper: '#fff3e0', accent: '#f48120', variant: 5 },
+    'HuggingFace':         { paper: '#fef7e0', accent: '#ffbd45', variant: 6 },
   };
   const defaultTheme: Theme = { paper: '#f5f0e8', accent: '#8b8579', variant: 0 };
   function th(provider: string): Theme { return themes[provider] || defaultTheme; }

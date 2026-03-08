@@ -5,6 +5,7 @@ const routes = {
   '#/overview': 'Overview',
   '#/providers': 'Providers',
   '#/apps': 'Apps',
+  '#/accounts': 'Accounts',
   '#/routing': 'Routing',
   '#/usage': 'Usage',
   '#/opportunities': 'Opportunities',

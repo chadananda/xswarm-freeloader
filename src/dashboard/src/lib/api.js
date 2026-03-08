@@ -32,5 +32,11 @@ export const api = {
   updateRouting: (data) => apiFetch('/routing', { method: 'PUT', body: JSON.stringify(data) }),
   settings: () => apiFetch('/settings'),
   updateSettings: (data) => apiFetch('/settings', { method: 'PUT', body: JSON.stringify(data) }),
-  changePassword: (data) => apiFetch('/auth/password', { method: 'PUT', body: JSON.stringify(data) })
+  changePassword: (data) => apiFetch('/auth/password', { method: 'PUT', body: JSON.stringify(data) }),
+  accounts: () => apiFetch('/accounts'),
+  createAccount: (data) => apiFetch('/accounts', { method: 'POST', body: JSON.stringify(data) }),
+  updateAccountKey: (id, api_key) => apiFetch(`/accounts/${id}/key`, { method: 'PUT', body: JSON.stringify({ api_key }) }),
+  deleteAccount: (id) => apiFetch(`/accounts/${id}`, { method: 'DELETE' }),
+  testAccount: (id) => apiFetch(`/accounts/${id}/test`, { method: 'POST' }),
+  rateLimits: () => apiFetch('/rate-limits')
 }

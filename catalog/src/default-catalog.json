@@ -746,6 +746,138 @@
           "routing_tier": "premium"
         }
       ]
+    },
+    {
+      "id": "nvidia",
+      "name": "NVIDIA NIM",
+      "adapter": "openai",
+      "base_url": "https://integrate.api.nvidia.com/v1",
+      "trust_tier": "standard",
+      "models": [
+        {
+          "id": "meta/llama-3.1-8b-instruct",
+          "name": "Llama 3.1 8B Instruct",
+          "context_window": 128000,
+          "supports_tools": true,
+          "supports_vision": false,
+          "pricing_input": 0,
+          "pricing_output": 0,
+          "free_tier": true,
+          "free_tier_rpm": 40,
+          "routing_tier": "free"
+        },
+        {
+          "id": "mistralai/mistral-7b-instruct-v0.3",
+          "name": "Mistral 7B Instruct",
+          "context_window": 32768,
+          "supports_tools": true,
+          "supports_vision": false,
+          "pricing_input": 0,
+          "pricing_output": 0,
+          "free_tier": true,
+          "free_tier_rpm": 40,
+          "routing_tier": "free"
+        }
+      ]
+    },
+    {
+      "id": "github",
+      "name": "GitHub Models",
+      "adapter": "openai",
+      "base_url": "https://models.inference.ai.azure.com",
+      "trust_tier": "standard",
+      "models": [
+        {
+          "id": "gpt-4o-mini",
+          "name": "GPT-4o Mini",
+          "context_window": 128000,
+          "supports_tools": true,
+          "supports_vision": true,
+          "pricing_input": 0,
+          "pricing_output": 0,
+          "free_tier": true,
+          "free_tier_rpm": 15,
+          "free_tier_rpd": 150,
+          "routing_tier": "free"
+        },
+        {
+          "id": "Phi-3.5-mini-instruct",
+          "name": "Phi-3.5 Mini Instruct",
+          "context_window": 128000,
+          "supports_tools": true,
+          "supports_vision": false,
+          "pricing_input": 0,
+          "pricing_output": 0,
+          "free_tier": true,
+          "free_tier_rpm": 15,
+          "free_tier_rpd": 150,
+          "routing_tier": "free"
+        }
+      ]
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare Workers AI",
+      "adapter": "openai",
+      "base_url": "https://api.cloudflare.com/client/v4/accounts/{id}/ai/v1",
+      "trust_tier": "standard",
+      "models": [
+        {
+          "id": "@cf/meta/llama-3.1-8b-instruct",
+          "name": "Llama 3.1 8B Instruct",
+          "context_window": 128000,
+          "supports_tools": true,
+          "supports_vision": false,
+          "pricing_input": 0,
+          "pricing_output": 0,
+          "free_tier": true,
+          "routing_tier": "free"
+        },
+        {
+          "id": "@cf/mistral/mistral-7b-instruct-v0.1",
+          "name": "Mistral 7B Instruct",
+          "context_window": 32768,
+          "supports_tools": false,
+          "supports_vision": false,
+          "pricing_input": 0,
+          "pricing_output": 0,
+          "free_tier": true,
+          "routing_tier": "free"
+        }
+      ]
+    },
+    {
+      "id": "huggingface",
+      "name": "HuggingFace",
+      "adapter": "openai",
+      "base_url": "https://api-inference.huggingface.co/v1",
+      "trust_tier": "standard",
+      "models": [
+        {
+          "id": "meta-llama/Llama-3.1-8B-Instruct",
+          "name": "Llama 3.1 8B Instruct",
+          "context_window": 128000,
+          "supports_tools": false,
+          "supports_vision": false,
+          "pricing_input": 0,
+          "pricing_output": 0,
+          "free_tier": true,
+          "free_tier_rpm": 60,
+          "routing_tier": "free"
+        },
+        {
+          "id": "mistralai/Mistral-7B-Instruct-v0.3",
+          "name": "Mistral 7B Instruct",
+          "context_window": 32768,
+          "supports_tools": false,
+          "supports_vision": false,
+          "pricing_input": 0,
+          "pricing_output": 0,
+          "free_tier": true,
+          "free_tier_rpm": 60,
+          "routing_tier": "free"
+        }
+      ]
     }
   ]
 }

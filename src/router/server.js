@@ -8,6 +8,7 @@ import { CatalogSync } from '../providers/catalog-sync.js';
 import { BudgetTracker } from '../budget/tracker.js';
 import { BudgetEnforcer } from '../budget/enforcer.js';
 import { createLogger } from '../utils/logger.js';
+import { RateLimiter } from './rate-limiter.js';
 import { createApp, registerRoutes } from './app.js';
 
 export async function startServer(options = {}) {
@@ -43,11 +44,12 @@ export async function startServer(options = {}) {
   // Budget
   const budgetTracker = new BudgetTracker(db, logger);
   const budgetEnforcer = new BudgetEnforcer(budgetTracker, logger);
-
+  // Rate limiter — limits loaded in registerRoutes after context is wired
+  const rateLimiter = new RateLimiter();
   // Context
   const context = {
     config, logger, db, providers, models, accounts, apps, usage,
-    registry, healthMonitor, budgetTracker, budgetEnforcer
+    registry, healthMonitor, budgetTracker, budgetEnforcer, rateLimiter
   };
 
   // Fastify

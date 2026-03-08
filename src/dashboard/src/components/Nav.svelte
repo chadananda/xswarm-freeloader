@@ -8,6 +8,7 @@
     { hash: '#/overview', label: 'Overview', icon: '📊' },
     { hash: '#/providers', label: 'Providers', icon: '🔌' },
     { hash: '#/apps', label: 'Apps', icon: '📦' },
+    { hash: '#/accounts', label: 'Accounts', icon: '🔑' },
     { hash: '#/routing', label: 'Routing', icon: '🗺️' },
     { hash: '#/usage', label: 'Usage', icon: '📈' },
     { hash: '#/opportunities', label: 'Opportunities', icon: '💡' },

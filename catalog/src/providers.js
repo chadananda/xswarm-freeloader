@@ -131,5 +131,37 @@ export const PROVIDERS = [
     trust_tier: "standard",
     docs_url: "https://docs.anthropic.com",
   },
+  {
+    id: "nvidia",
+    name: "NVIDIA NIM",
+    adapter: "openai",
+    base_url: "https://integrate.api.nvidia.com/v1",
+    trust_tier: "standard",
+    docs_url: "https://build.nvidia.com/docs",
+  },
+  {
+    id: "github",
+    name: "GitHub Models",
+    adapter: "openai",
+    base_url: "https://models.inference.ai.azure.com",
+    trust_tier: "standard",
+    docs_url: "https://docs.github.com/en/github-models",
+  },
+  {
+    id: "cloudflare",
+    name: "Cloudflare Workers AI",
+    adapter: "openai",
+    base_url: "https://api.cloudflare.com/client/v4/accounts/{id}/ai/v1",
+    trust_tier: "standard",
+    docs_url: "https://developers.cloudflare.com/workers-ai",
+  },
+  {
+    id: "huggingface",
+    name: "HuggingFace",
+    adapter: "openai",
+    base_url: "https://api-inference.huggingface.co/v1",
+    trust_tier: "standard",
+    docs_url: "https://huggingface.co/docs/api-inference",
+  },
 ];
 export const PROVIDER_MAP = Object.fromEntries(PROVIDERS.map((p) => [p.id, p]));

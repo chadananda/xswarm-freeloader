@@ -3,7 +3,7 @@ export interface Props {
   title?: string;
   description?: string;
 }
-const { title = 'Freeloader — Stop paying for AI', description = 'Drop-in OpenAI proxy that exhausts every free tier before spending a cent. 16 providers, 50 models, $0/month.' } = Astro.props;
+const { title = 'Freeloader — Stop paying for AI', description = 'Drop-in OpenAI proxy that exhausts every free tier before spending a cent. 20 providers, 60 models, $0/month.' } = Astro.props;
 const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://freeloader.xswarm.ai');
 ---

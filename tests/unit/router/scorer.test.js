@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { scoreModel, scoreModels, calculateBenchmarks } from '../../../src/router/scorer.js';
+import { scoreModel, scoreModels, calculateBenchmarks, selectRoute, estimateTokens } from '../../../src/router/scorer.js';
 
 const weights = { cost: 0.4, speed: 0.4, quality: 0.2 };
 
@@ -50,5 +50,73 @@ describe('calculateBenchmarks', () => {
   it('should handle empty array', () => {
     const b = calculateBenchmarks([]);
     expect(b.maxCost).toBe(100);
+  });
+});
+
+describe('estimateTokens', () => {
+  it('estimates from string content', () => {
+    const req = { messages: [{ role: 'user', content: 'hello world' }] };
+    expect(estimateTokens(req)).toBeGreaterThan(0);
+  });
+  it('estimates from array content parts', () => {
+    const req = { messages: [{ role: 'user', content: [{ text: 'hello' }, { text: ' world' }] }] };
+    expect(estimateTokens(req)).toBeGreaterThan(0);
+  });
+  it('returns 0 for empty messages', () => {
+    expect(estimateTokens({ messages: [] })).toBe(0);
+  });
+});
+
+describe('selectRoute', () => {
+  const base = { id: 'p/m', provider_id: 'openai', trust_tier: 'open', pricing_input: 5, pricing_output: 15, free_tier: false, supports_tools: false, supports_vision: false, context_window: 128000 };
+  const free = { ...base, id: 'p/free', pricing_input: 0, free_tier: true };
+  const tools = { ...base, id: 'p/tools', supports_tools: true, pricing_input: 3 };
+
+  it('returns cheapest-first when all pass', async () => {
+    const result = await selectRoute([base, free], { messages: [{ role: 'user', content: 'hi' }] });
+    expect(result[0].id).toBe('p/free');
+  });
+
+  it('filters out models lacking tools support', async () => {
+    const result = await selectRoute([base, tools], { messages: [], requiresTools: true });
+    expect(result.every(m => m.supports_tools)).toBe(true);
+  });
+
+  it('filters by trust tier', async () => {
+    const priv = { ...base, id: 'p/priv', trust_tier: 'private' };
+    const result = await selectRoute([base, priv], { messages: [] }, { trustTier: 'standard' });
+    expect(result.find(m => m.trust_tier === 'open')).toBeUndefined();
+  });
+
+  it('filters out unavailable providers via healthMonitor', async () => {
+    const healthMonitor = { isAvailable: (id) => id !== 'openai' };
+    const result = await selectRoute([base, free], { messages: [] }, { healthMonitor });
+    expect(result.find(m => m.provider_id === 'openai')).toBeUndefined();
+  });
+
+  it('filters out rate-limited models', async () => {
+    const rateLimiter = { canRequest: (id) => id === 'p/free' ? { allowed: true } : { allowed: false } };
+    const result = await selectRoute([base, free], { messages: [] }, { rateLimiter });
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe('p/free');
+  });
+
+  it('filters out models missing API key', async () => {
+    const accounts = { getByProvider: (id) => id === 'groq' ? [{ api_key: 'key' }] : [] };
+    const groq = { ...base, id: 'g/m', provider_id: 'groq' };
+    const result = await selectRoute([base, groq], { messages: [] }, { accounts });
+    expect(result.every(m => m.provider_id === 'groq')).toBe(true);
+  });
+
+  it('sorts by latency as tiebreaker for same cost', async () => {
+    const local = { ...free, id: 'local/m', provider_id: 'local', is_local: true };
+    const result = await selectRoute([free, local], { messages: [] });
+    expect(result[0].is_local).toBe(true); // local = 50ms latency wins
+  });
+
+  it('returns empty array when all filtered', async () => {
+    const healthMonitor = { isAvailable: () => false };
+    const result = await selectRoute([base], { messages: [] }, { healthMonitor });
+    expect(result).toHaveLength(0);
   });
 });

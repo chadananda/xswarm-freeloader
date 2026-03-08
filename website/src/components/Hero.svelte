@@ -10,8 +10,8 @@
 
   onMount(() => {
     mounted = true;
-    const providerTarget = 16;
-    const modelTarget = 50;
+    const providerTarget = 20;
+    const modelTarget = 60;
     let start = performance.now();
     function animate(now: number) {
       const elapsed = now - start;
@@ -149,7 +149,7 @@
           </div>
           <div class="hero-card__content">
             <div class="font-heading text-5xl sm:text-6xl text-ink leading-none text-center">
-              {mounted ? providerCount : 16}+
+              {mounted ? providerCount : 20}+
             </div>
             <div class="font-typewriter text-xs text-faded mt-2 tracking-wider uppercase text-center">providers</div>
           </div>
@@ -165,7 +165,7 @@
           </div>
           <div class="hero-card__content">
             <div class="font-heading text-5xl sm:text-6xl text-ink leading-none text-center">
-              {mounted ? modelCount : 50}+
+              {mounted ? modelCount : 60}+
             </div>
             <div class="font-typewriter text-xs text-faded mt-2 tracking-wider uppercase text-center">models</div>
           </div>

@@ -21,6 +21,9 @@
     if (n.includes('ollama') || n.includes('local') || n.includes('lm studio')) return 'ollama';
     if (n.includes('hugging')) return 'huggingface';
     if (n.includes('inception') || n.includes('mercury')) return 'inception';
+    if (n.includes('nvidia') || n.includes('nim')) return 'nvidia';
+    if (n.includes('github')) return 'github';
+    if (n.includes('cloudflare')) return 'cloudflare';
     return 'generic';
   }
 
@@ -119,6 +122,35 @@
     <path d="M4 16C8 12 12 10 20 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
     <path d="M4 20C8 16 12 14 20 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
     <circle cx="20" cy="6" r="2"/>
+  {:else if k === 'nvidia'}
+    <!-- NVIDIA - GPU chip with circuit lines -->
+    <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    <rect x="7" y="7" width="10" height="10" rx="1"/>
+    <line x1="8" y1="2" x2="8" y2="4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="12" y1="2" x2="12" y2="4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="16" y1="2" x2="16" y2="4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="8" y1="20" x2="8" y2="22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="12" y1="20" x2="12" y2="22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="16" y1="20" x2="16" y2="22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="2" y1="8" x2="4" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="2" y1="12" x2="4" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="2" y1="16" x2="4" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="20" y1="8" x2="22" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="20" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="20" y1="16" x2="22" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  {:else if k === 'github'}
+    <!-- GitHub - Octocat-inspired circle head with tentacle base -->
+    <circle cx="12" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    <path d="M7 13C5 14 4 16 4 19H20C20 16 19 14 17 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="9.5" cy="7.5" r="1"/>
+    <circle cx="14.5" cy="7.5" r="1"/>
+    <path d="M10 10.5C10.5 11.2 13.5 11.2 14 10.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M12 13v3M10 14v2M14 14v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  {:else if k === 'cloudflare'}
+    <!-- Cloudflare - shield with hexagon -->
+    <path d="M12 2L4 6V13C4 17.4 7.4 21.5 12 22C16.6 21.5 20 17.4 20 13V6L12 2Z" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    <path d="M12 7L9 8.7V12L12 13.7L15 12V8.7L12 7Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <circle cx="12" cy="10.5" r="1.2"/>
   {:else if k === 'huggingface'}
     <!-- Hugging Face - simple smiley -->
     <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.8"/>
