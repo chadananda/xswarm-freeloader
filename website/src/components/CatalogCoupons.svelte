@@ -20,6 +20,7 @@
     'Together AI':     { paper: '#e6f2fb', accent: '#0284c7', variant: 6 },
     'DeepSeek':        { paper: '#eaeefa', accent: '#3b5ce4', variant: 3 },
     'Ollama (Local)':  { paper: '#f2ebfa', accent: '#9333ea', variant: 7 },
+    'xAI':             { paper: '#f0f0f0', accent: '#1a1a1a', variant: 0 },
     'Inception Labs':  { paper: '#e8f5f0', accent: '#0a9e6f', variant: 2 },
   };
   const defaultTheme: Theme = { paper: '#f5f0e8', accent: '#8b8579', variant: 0 };

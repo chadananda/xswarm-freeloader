@@ -611,6 +611,37 @@
       ]
     },
     {
+      "id": "xai",
+      "name": "xAI",
+      "adapter": "openai",
+      "base_url": "https://api.x.ai/v1",
+      "trust_tier": "standard",
+      "models": [
+        {
+          "id": "grok-3-fast",
+          "name": "Grok 3 Fast",
+          "context_window": 131072,
+          "supports_tools": true,
+          "supports_vision": true,
+          "pricing_input": 5.00,
+          "pricing_output": 25.00,
+          "free_tier": false,
+          "routing_tier": "premium"
+        },
+        {
+          "id": "grok-3-mini-fast",
+          "name": "Grok 3 Mini Fast",
+          "context_window": 131072,
+          "supports_tools": true,
+          "supports_vision": false,
+          "pricing_input": 0.30,
+          "pricing_output": 0.50,
+          "free_tier": false,
+          "routing_tier": "budget"
+        }
+      ]
+    },
+    {
       "id": "openai",
       "name": "OpenAI",
       "adapter": "openai",
@@ -637,7 +668,7 @@
           "pricing_input": 0.15,
           "pricing_output": 0.60,
           "free_tier": false,
-          "routing_tier": "premium"
+          "routing_tier": "budget"
         },
         {
           "id": "o1",

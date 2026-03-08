@@ -10,6 +10,7 @@
     if (n.includes('sambanova')) return 'sambanova';
     if (n.includes('mistral')) return 'mistral';
     if (n.includes('openrouter')) return 'openrouter';
+    if (n.includes('xai') || n.includes('grok')) return 'xai';
     if (n.includes('openai')) return 'openai';
     if (n.includes('anthropic')) return 'anthropic';
     if (n.includes('together')) return 'together';
@@ -61,6 +62,9 @@
     <!-- OpenRouter - routing arrows -->
     <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
     <path d="M8 12H16M16 12L13 9M16 12L13 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  {:else if k === 'xai'}
+    <!-- xAI Grok - X mark -->
+    <path d="M4 4L10.5 12L4 20H7L12 13.5L17 20H20L13.5 12L20 4H17L12 10.5L7 4H4Z"/>
   {:else if k === 'openai'}
     <!-- OpenAI - hexagonal iris -->
     <path d="M12 2.5L3.5 7.25V16.75L12 21.5L20.5 16.75V7.25L12 2.5Z" fill="none" stroke="currentColor" stroke-width="1.8"/>

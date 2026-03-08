@@ -108,6 +108,14 @@ export const PROVIDERS = [
     docs_url: "https://docs.inceptionlabs.ai",
   },
   {
+    id: "xai",
+    name: "xAI",
+    adapter: "openai",
+    base_url: "https://api.x.ai/v1",
+    trust_tier: "standard",
+    docs_url: "https://docs.x.ai",
+  },
+  {
     id: "openai",
     name: "OpenAI",
     adapter: "openai",
