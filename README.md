@@ -1,12 +1,8 @@
-<p align="center">
-  <img src="https://freeloader.xswarm.ai/og-image.png" alt="Freeloader" width="600" />
-</p>
-
 <h1 align="center">Freeloader</h1>
 
 <p align="center">
   <strong>Your AI provider's worst nightmare.</strong><br>
-  <em>OpenAI-compatible proxy that routes to 127 free tier models before spending a cent.</em>
+  <em>OpenAI-compatible proxy that exhausts every free tier before spending a cent.</em>
 </p>
 
 <p align="center">
@@ -20,20 +16,47 @@
 ```
 $ npx xswarm-freeloader
 
-  ╔═╗╦═╗╔═╗╔═╗╦  ╔═╗╔═╗╔╦╗╔═╗╦═╗
-  ╠╣ ╠╦╝║╣ ║╣ ║  ║ ║╠═╣ ║║║╣ ╠╦╝
-  ╚  ╩╚═╚═╝╚═╝╩═╝╚═╝╩ ╩═╩╝╚═╝╩╚═
+ ███████╗██████╗ ███████╗███████╗
+ ██╔════╝██╔══██╗██╔════╝██╔════╝
+ █████╗  ██████╔╝█████╗  █████╗
+ ██╔══╝  ██╔══██╗██╔══╝  ██╔══╝
+ ██║     ██║  ██║███████╗███████╗
+ ╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝
 
-  ✓ Created ~/.xswarm/
-  ✓ Config + database initialized
-  ✓ Synced provider catalog (8 providers, 127 models)
-  ✓ Default app created
-  ✓ Started xswarm-router    → :4011
-  ✓ Started xswarm-dashboard → :4010
+ ██╗      ██████╗  █████╗ ██████╗ ███████╗██████╗
+ ██║     ██╔═══██╗██╔══██╗██╔══██╗██╔════╝██╔══██╗
+ ██║     ██║   ██║███████║██║  ██║█████╗  ██████╔╝
+ ██║     ██║   ██║██╔══██║██║  ██║██╔══╝  ██╔══██╗
+ ███████╗╚██████╔╝██║  ██║██████╔╝███████╗██║  ██║
+ ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝
 
-  🔑 API Key: xsw_a1b2c3d4e5f6...
+  "Your AI provider's worst nightmare."
 
-  Your AI provider just felt a disturbance in the force.
+  Freeloader is a local LLM proxy router that rotates requests around current
+  free-tier offers in an attempt to reduce or wipe out your AI bill.
+
+  ✓ Setting up...
+      Created ~/.xswarm/
+      SQLite database initialized (WAL mode)
+      pm2 process manager ready
+
+  ✓ Scanning for local models...
+      Ollama detected — 3 models (llama3.2, mistral, phi3)
+      Local models added to private trust tier
+
+  ✓ Provider catalog synced
+      Gemini ............ 3 free models
+      Groq .............. 2 free models
+      Mistral ........... 1 free model
+      OpenRouter ........ 2 free models
+      Ollama ............ 3 local models
+      Together, OpenAI, Anthropic (paid fallback)
+      Free first → lowest cost next → premium last
+
+  ✓ Router → http://localhost:4011
+  ✓ Dashboard → http://localhost:4010
+
+  Somewhere, a pricing page is crying.
 ```
 
 <br>
@@ -112,7 +135,7 @@ Your app (unchanged)
 └──────────────────────────────────────────────┘
   │
   ▼
-Gemini · Groq · Mistral · OpenRouter · xAI · Ollama · ...
+Gemini · Groq · Mistral · OpenRouter · Together · Ollama · ...
 ```
 
 Freeloader scores every available model on three axes — **cost, speed, and quality** — filtered by your trust requirements. Free tiers are always preferred. When they're exhausted, it falls back to your cheapest paid option. When your budget says stop, it stops.
@@ -192,9 +215,7 @@ These are real, production-quality models with generous free tiers:
 |----------|-------------|-------------|------------|
 | **Google Gemini** | Gemini 2.5 Pro, 2.0 Flash, Flash Lite | 25-1,500 req/day | 1M context, vision, tools |
 | **Groq** | Llama 3.3 70B, Gemma 2 9B | 14,400 req/day | Fastest inference anywhere |
-| **Cerebras** | Llama 3.3 70B | 1,000 req/day | Ultra-fast inference |
 | **Mistral** | Mistral Small | 500 req/day | 128K context, EU-hosted |
-| **xAI** | Grok Beta | 60 req/hour | 131K context |
 | **OpenRouter** | Llama 3.3 70B, Gemini Flash | Varies | Aggregated free models |
 | **Local** | Anything via Ollama/LM Studio | Unlimited | Private, zero-cost, zero-latency |
 
@@ -324,7 +345,7 @@ Query parameters for routing introspection:
 
 ## Provider adapters
 
-9 native JavaScript adapters. No Python. No LiteLLM. No subprocess. Just `fetch()`.
+8 native JavaScript adapters. No Python. No LiteLLM. No subprocess. Just `fetch()`.
 
 | Provider | Protocol | Free Tier |
 |----------|----------|-----------|
@@ -332,9 +353,7 @@ Query parameters for routing introspection:
 | Anthropic | Messages API → OpenAI format | No |
 | Google Gemini | Generative AI API → OpenAI format | Yes |
 | Groq | OpenAI-compatible | Yes |
-| Cerebras | OpenAI-compatible | Yes |
 | Mistral | OpenAI-compatible | Yes |
-| xAI (Grok) | OpenAI-compatible | Yes |
 | Together AI | OpenAI-compatible | No |
 | OpenRouter | OpenAI-compatible | Yes (some models) |
 | Local (Ollama / LM Studio) | OpenAI-compatible | Always free |
@@ -385,7 +404,7 @@ src/
   db/             SQLite schema, 8 migrations, 9 repositories
   config/         Loader, defaults, manager, Zod schemas
   router/         Fastify server, auth, scorer, sanitizer, fallback, quality gates
-  providers/      9 native adapters, registry, health monitor, degradation scorer
+  providers/      8 native adapters, registry, health monitor, degradation scorer
   budget/         Tracker and enforcer
   email/          Multi-range digest, PDF reports, alerts, Resend/SMTP mailer
   dashboard/      Svelte 5 SPA — 8 views, 7 components
