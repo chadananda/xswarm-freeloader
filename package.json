@@ -1,6 +1,6 @@
 {
   "name": "xswarm-freeloader",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Intelligent AI router that maximizes free tier usage across 100+ LLM providers",
   "type": "module",
   "main": "src/router/server.js",
