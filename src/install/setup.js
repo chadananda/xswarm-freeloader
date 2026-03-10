@@ -87,16 +87,14 @@ export async function setup(options = {}) {
 
   db.close();
 
-  // 7. Start pm2 processes
+  // 7. Start pm2 process (router serves dashboard static files)
   const routerScript = path.resolve(__dirname, '..', 'router', 'server.js');
-  const dashboardDir = path.resolve(__dirname, '..', 'dashboard');
 
   if (options.restart) {
     try { execSync('pm2 delete xswarm-router xswarm-dashboard 2>/dev/null', { stdio: 'ignore' }); } catch {}
   }
 
   startPm2Process('xswarm-router', routerScript);
-  startPm2Dashboard('xswarm-dashboard', dashboardDir, config.server?.dashboardPort || 4010);
 
   // 8. pm2 startup + save
   try {
@@ -113,11 +111,12 @@ export async function setup(options = {}) {
   await promptEmail(configLoader);
 
   // 10. Open dashboard
-  const dashboardUrl = `http://localhost:${config.server?.dashboardPort || 4010}`;
+  const routerPort = config.server?.routerPort || 4011;
+  const dashboardUrl = `http://localhost:${routerPort}`;
   const quip = QUIPS[Math.floor(Math.random() * QUIPS.length)];
   console.log(`\n  🔑 API Key: ${defaultApp.api_key}`);
   console.log(`\n  🚀 Dashboard: ${dashboardUrl}`);
-  console.log(`  🔗 Router:    http://localhost:${config.server?.routerPort || 4011}`);
+  console.log(`  🔗 API:       ${dashboardUrl}/v1/`);
   console.log(`\n  ${quip}\n`);
 
   try {
@@ -149,24 +148,6 @@ function startPm2Process(name, script) {
 
   try {
     execSync(`pm2 start ${script} --name ${name} --node-args="--experimental-modules"`, { stdio: 'ignore' });
-    console.log(`  ✓ Started ${name}`);
-  } catch (err) {
-    console.error(`  ✗ Failed to start ${name}: ${err.message}`);
-  }
-}
-
-function startPm2Dashboard(name, cwd, port) {
-  try {
-    const list = JSON.parse(execSync('pm2 jlist 2>/dev/null', { encoding: 'utf8' }) || '[]');
-    const existing = list.find(p => p.name === name);
-    if (existing && existing.pm2_env?.status === 'online') {
-      console.log(`  ✓ ${name} already running`);
-      return;
-    }
-  } catch {}
-
-  try {
-    execSync(`pm2 start "npx vite --port ${port}" --name ${name} --cwd ${cwd}`, { stdio: 'ignore' });
     console.log(`  ✓ Started ${name}`);
   } catch (err) {
     console.error(`  ✗ Failed to start ${name}: ${err.message}`);

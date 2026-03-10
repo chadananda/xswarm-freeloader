@@ -53,8 +53,7 @@ $ npx xswarm-freeloader
       Together, OpenAI, Anthropic (paid fallback)
       Free first → lowest cost next → premium last
 
-  ✓ Router → http://localhost:4011
-  ✓ Dashboard → http://localhost:4010
+  ✓ Router + Dashboard → http://localhost:4011
 
   Somewhere, a pricing page is crying.
 ```
@@ -173,7 +172,7 @@ Freeloader scores every available model on three axes — **cost, speed, and qua
 - Reports include PDF attachment with executive summary, hourly breakdowns, provider distribution, and growth metrics
 
 ### Dashboard
-A local web UI at `http://localhost:4010` — dark paper theme, 8 views:
+A local web UI at `http://localhost:4011` — dark paper theme, 8 views:
 
 | View | What it does |
 |------|-------------|
@@ -298,7 +297,7 @@ Everything lives in `~/.xswarm/config.json`:
   },
   "server": {
     "routerPort": 4011,
-    "dashboardPort": 4010
+    "port": 4011
   },
   "email": {
     "enabled": false,
@@ -378,7 +377,7 @@ npx xswarm-freeloader
        │    ├─ budget enforcer → per-app hard/soft limits
        │    ├─ config manager → versioned config with rollback
        │    └─ report generator → multi-range PDF & email digests
-       └─ xswarm-dashboard (port 4010) — Svelte 5 SPA
+       └─ dashboard (served at /) — Svelte 5 SPA
             └─ 8 views, 7 components, dark paper theme
 ```
 

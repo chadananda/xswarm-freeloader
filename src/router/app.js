@@ -7,17 +7,37 @@
 //
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import fastifyStatic from '@fastify/static';
 import crypto from 'crypto';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { existsSync } from 'fs';
 import { authenticateApiKey } from './auth.js';
 import { RateLimiter } from './rate-limiter.js';
 //
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+//
 export function createApp(context) {
-  const fastify = Fastify({ logger: context.logger || false });
+  const fastify = context.logger
+    ? Fastify({ loggerInstance: context.logger })
+    : Fastify({ logger: false });
   fastify.register(cors, {
-    origin: [`http://localhost:${context.config?.server?.dashboardPort || 4010}`, 'http://127.0.0.1:4010'],
+    origin: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true
   });
+  // Serve pre-built dashboard static files at root
+  const dashboardDist = path.resolve(__dirname, '..', 'dashboard', 'dist');
+  if (existsSync(dashboardDist)) {
+    fastify.register(fastifyStatic, { root: dashboardDist, prefix: '/' });
+    // SPA fallback — serve index.html for unmatched non-API GET requests
+    fastify.setNotFoundHandler((request, reply) => {
+      if (request.method === 'GET' && !request.url.startsWith('/v1/') && !request.url.startsWith('/api/')) {
+        return reply.sendFile('index.html');
+      }
+      reply.status(404).send({ error: { message: 'Not found', type: 'not_found', code: 404 } });
+    });
+  }
   fastify.addHook('onRequest', authenticateApiKey(context.apps, context.appKeys));
   fastify.setErrorHandler((error, request, reply) => {
     const statusCode = error.statusCode || 500;

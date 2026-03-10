@@ -16,8 +16,8 @@ PRD.md
 .idea/
 *.log
 
-# Build artifacts
-dist/
+# Build artifacts (root dist only — keep src/dashboard/dist/)
+/dist/
 
 # Temporary files
 tmp/
@@ -46,5 +46,7 @@ scripts/
 catalog/
 
 # Load/integration/BDD tests are already excluded by tests/ above
-# Dashboard source (built separately)
+# Dashboard dev files (keep dist/)
 src/dashboard/node_modules/
+src/dashboard/src/
+src/dashboard/vite.config.js
