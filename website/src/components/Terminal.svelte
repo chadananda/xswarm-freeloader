@@ -276,7 +276,9 @@
   /* ── mobile ─────────────────────────────────────────────────────────── */
   @media (max-width: 639px) {
     .printout-wrap { transform: none; }
-    .printout-body { font-size: 0.58rem; line-height: 1.5; padding: 0.8rem 0.75rem 1.25rem; min-height: 280px; }
+    .printout-body { font-size: 0.65rem; line-height: 1.5; padding: 0.8rem 0.75rem 1.25rem; min-height: 280px; white-space: pre-wrap; word-break: break-word; }
+    .pline { white-space: pre-wrap; }
+    .pline-banner { display: none; }
     .printout-header { padding: 16px 1rem 6px; }
     .feed-strip { width: 16px; }
     .feed-strip::after { background-size: 16px 18px; }

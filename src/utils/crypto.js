@@ -38,7 +38,18 @@ export function decryptApiKey(encryptedData, ivHex) {
 export function generateApiKey(prefix = 'xsw') {
   return `${prefix}_${crypto.randomBytes(24).toString('hex')}`;
 }
-
+//
+export function hashApiKey(key) {
+  return crypto.createHash('sha256').update(key).digest('hex');
+}
+//
+export function generateAppApiKey(prefix = 'xsw') {
+  const key = `${prefix}_${crypto.randomBytes(24).toString('hex')}`;
+  const hash = hashApiKey(key);
+  const keyPrefix = key.substring(0, prefix.length + 5); // e.g. "xsw_abcd"
+  return { key, hash, prefix: keyPrefix };
+}
+//
 export function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString('hex');
   const hash = crypto.scryptSync(password, salt, 64).toString('hex');

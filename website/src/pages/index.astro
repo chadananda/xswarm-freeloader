@@ -14,7 +14,7 @@ export const prerender = true;
   <!-- ═══════════════════════════════════════════════════
        SECTION: "The Problem"
        ═══════════════════════════════════════════════════ -->
-  <section class="relative py-28 px-4">
+  <section class="relative py-16 sm:py-28 px-4">
     <div class="relative max-w-5xl mx-auto">
       <div class="text-center mb-16 reveal">
         <h2 class="font-heading text-3xl sm:text-5xl mb-5">
@@ -74,7 +74,7 @@ export const prerender = true;
         <!-- Provider chips: two rows -->
         <div class="w-full space-y-4">
           <!-- Free tier providers -->
-          <div class="grid grid-cols-4 sm:grid-cols-7 gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
             <div style="transform: rotate(-0.8deg);">
               <PaperCard color="#d0e0da">
                 <div class="chip-inner">
@@ -140,7 +140,7 @@ export const prerender = true;
             </div>
           </div>
           <!-- Budget / paid fallback providers -->
-          <div class="grid grid-cols-4 sm:grid-cols-7 gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
             <div style="transform: rotate(0.3deg);">
               <PaperCard color="#e6ddd0">
                 <div class="chip-inner chip-budget">
@@ -215,7 +215,7 @@ export const prerender = true;
   <!-- ═══════════════════════════════════════════════════
        SECTION: "The Proof" — pricing cards
        ═══════════════════════════════════════════════════ -->
-  <section class="relative py-28 px-4">
+  <section class="relative py-16 sm:py-28 px-4">
     <div class="max-w-5xl mx-auto">
       <div class="text-center mb-16 reveal">
         <h2 class="font-heading text-3xl sm:text-5xl mb-5">
@@ -295,7 +295,7 @@ export const prerender = true;
 
       <!-- Instruction manual -->
       <div class="reveal reveal-d2 text-center">
-        <div class="inline-block" style="transform: rotate(-0.5deg); min-width: 340px;">
+        <div class="inline-block" style="transform: rotate(-0.5deg); max-width: 340px; width: 100%;">
           <PaperCard color="#f0ebe0">
             <div class="px-10 py-8 text-center">
               <div class="font-heading text-sm text-faded tracking-wider uppercase mb-5">Instruction Manual</div>
@@ -313,7 +313,7 @@ export const prerender = true;
   <!-- ═══════════════════════════════════════════════════
        SECTION: "Trust Tiers"
        ═══════════════════════════════════════════════════ -->
-  <section class="relative py-28 px-4">
+  <section class="relative py-16 sm:py-28 px-4">
     <div class="max-w-5xl mx-auto">
       <div class="text-center mb-16 reveal">
         <h2 class="font-heading text-3xl sm:text-5xl mb-5">
@@ -330,8 +330,8 @@ export const prerender = true;
         <!-- OPEN -->
         <div style="transform: rotate(-0.5deg);">
           <PaperCard color="#d0e0da">
-            <div class="p-8 pt-6">
-              <div class="h-1 bg-savings rounded-sm mb-5 -mx-8 -mt-6 rounded-t-[3px]"></div>
+            <div class="p-5 sm:p-8 pt-6">
+              <div class="h-1 bg-savings rounded-sm mb-5 -mx-5 sm:-mx-8 -mt-6 rounded-t-[3px]"></div>
               <div class="inline-block font-heading text-[0.7rem] tracking-[0.15em] px-2.5 py-0.5 mb-4 text-savings" style="border: 2px solid rgba(39,134,74,0.5); border-radius: 3px; transform: rotate(-2deg); background: rgba(39,134,74,0.05);">OPEN</div>
               <h3 class="font-heading text-xl text-ink mb-2">Anything goes</h3>
               <p class="font-typewriter text-sm text-faded mb-4">
@@ -354,8 +354,8 @@ export const prerender = true;
         <!-- STANDARD -->
         <div style="transform: rotate(0.3deg);">
           <PaperCard color="#d2dce4">
-            <div class="p-8 pt-6">
-              <div class="h-1 bg-blue-500 rounded-sm mb-5 -mx-8 -mt-6 rounded-t-[3px]"></div>
+            <div class="p-5 sm:p-8 pt-6">
+              <div class="h-1 bg-blue-500 rounded-sm mb-5 -mx-5 sm:-mx-8 -mt-6 rounded-t-[3px]"></div>
               <div class="inline-block font-heading text-[0.7rem] tracking-[0.15em] px-2.5 py-0.5 mb-4 text-blue-600" style="border: 2px solid rgba(59,130,246,0.5); border-radius: 3px; transform: rotate(-2deg); background: rgba(59,130,246,0.05);">STANDARD</div>
               <h3 class="font-heading text-xl text-ink mb-2">Trusted providers</h3>
               <p class="font-typewriter text-sm text-faded mb-4">
@@ -376,8 +376,8 @@ export const prerender = true;
         <!-- PRIVATE -->
         <div style="transform: rotate(-0.3deg);">
           <PaperCard color="#e4d6d4">
-            <div class="p-8 pt-6">
-              <div class="h-1 bg-stamp rounded-sm mb-5 -mx-8 -mt-6 rounded-t-[3px]"></div>
+            <div class="p-5 sm:p-8 pt-6">
+              <div class="h-1 bg-stamp rounded-sm mb-5 -mx-5 sm:-mx-8 -mt-6 rounded-t-[3px]"></div>
               <div class="inline-block font-heading text-[0.7rem] tracking-[0.15em] px-2.5 py-0.5 mb-4 text-stamp" style="border: 2px solid rgba(212,131,26,0.5); border-radius: 3px; transform: rotate(-2deg); background: rgba(212,131,26,0.05);">PRIVATE</div>
               <h3 class="font-heading text-xl text-ink mb-2">Never leaves your machine</h3>
               <p class="font-typewriter text-sm text-faded mb-4">
@@ -400,7 +400,7 @@ export const prerender = true;
   <!-- ═══════════════════════════════════════════════════
        SECTION: "It Gets Better"
        ═══════════════════════════════════════════════════ -->
-  <section class="relative py-28 px-4">
+  <section class="relative py-16 sm:py-28 px-4">
     <div class="max-w-5xl mx-auto">
       <div class="text-center mb-16 reveal">
         <h2 class="font-heading text-3xl sm:text-5xl mb-5">
@@ -412,7 +412,7 @@ export const prerender = true;
         <!-- Local LLMs -->
         <div style="transform: rotate(-0.7deg);">
           <PaperCard color="#d2dce4">
-            <div class="p-8">
+            <div class="p-5 sm:p-8">
               <div class="font-typewriter text-xs text-marker tracking-wider uppercase mb-4">LOCAL MODELS</div>
               <h3 class="font-heading text-2xl text-ink mb-3">
                 Got a GPU? <span class="text-marker">Add it to the mix.</span>
@@ -437,7 +437,7 @@ export const prerender = true;
         <!-- PDF Reports -->
         <div style="transform: rotate(0.5deg);">
           <PaperCard color="#d0e0da">
-            <div class="p-8">
+            <div class="p-5 sm:p-8">
               <div class="font-typewriter text-xs text-savings tracking-wider uppercase mb-4">REPORTS</div>
               <h3 class="font-heading text-2xl text-ink mb-3">
                 Show your boss <span class="text-savings">the savings.</span>
@@ -459,7 +459,7 @@ export const prerender = true;
         <!-- All local -->
         <div style="transform: rotate(0.4deg);">
           <PaperCard color="#ede5d4">
-            <div class="p-8">
+            <div class="p-5 sm:p-8">
               <div class="font-typewriter text-xs text-stamp tracking-wider uppercase mb-4">PRIVACY</div>
               <h3 class="font-heading text-2xl text-ink mb-3">
                 All local. <span class="text-stamp">All yours.</span>
@@ -477,7 +477,7 @@ export const prerender = true;
         <!-- Ecosystem -->
         <div style="transform: rotate(-0.6deg);">
           <PaperCard color="#dad4e0">
-            <div class="p-8">
+            <div class="p-5 sm:p-8">
               <div class="font-typewriter text-xs text-marker tracking-wider uppercase mb-4">ECOSYSTEM</div>
               <h3 class="font-heading text-2xl text-ink mb-3">
                 Part of <span class="text-marker">xSwarm.</span>
@@ -497,7 +497,7 @@ export const prerender = true;
   <!-- ═══════════════════════════════════════════════════
        SECTION: "Dead Simple Setup"
        ═══════════════════════════════════════════════════ -->
-  <section class="relative py-28 px-4">
+  <section class="relative py-16 sm:py-28 px-4">
     <div class="max-w-4xl mx-auto">
       <div class="text-center mb-16 reveal">
         <h2 class="font-heading text-3xl sm:text-5xl mb-5">
@@ -560,14 +560,14 @@ export const prerender = true;
         </div>
 
         <!-- Code example -->
-        <div style="transform: rotate(1.2deg);">
+        <div class="code-example-card" style="transform: rotate(1.2deg);">
           <PaperCard color="#ede5d4">
             <div class="overflow-hidden">
               <div class="bg-cream px-5 py-3 font-typewriter text-xs text-faded flex items-center gap-2" style="border-bottom: 1px solid rgba(180,170,155,0.3);">
                 <span class="w-2 h-2 rounded-full bg-savings"></span>
                 app.js — your existing code, unchanged
               </div>
-              <div class="p-5 font-typewriter text-sm leading-relaxed space-y-1">
+              <div class="p-5 font-typewriter text-xs sm:text-sm leading-relaxed space-y-1">
                 <div><span class="text-marker">import</span> <span class="text-ink">OpenAI</span> <span class="text-marker">from</span> <span class="text-savings">'openai'</span>;</div>
                 <div>&nbsp;</div>
                 <div><span class="text-marker">const</span> <span class="text-ink">client</span> = <span class="text-marker">new</span> <span class="text-ink">OpenAI</span>({'{'}
@@ -593,9 +593,9 @@ export const prerender = true;
   <!-- ═══════════════════════════════════════════════════
        SECTION: Features — clean paper cards
        ═══════════════════════════════════════════════════ -->
-  <section class="relative py-28 px-4">
+  <section class="relative py-16 sm:py-28 px-4">
     <div class="max-w-5xl mx-auto">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 reveal" style="padding: 0.5rem;">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 reveal" style="padding: 0.5rem;">
 
         <!-- Feature 1: Free Tier Rotation -->
         <div style="transform: rotate(-0.8deg);">
@@ -682,7 +682,7 @@ export const prerender = true;
   <!-- ═══════════════════════════════════════════════════
        SECTION: CTA
        ═══════════════════════════════════════════════════ -->
-  <section class="relative py-28 px-4">
+  <section class="relative py-16 sm:py-28 px-4">
     <div class="relative max-w-2xl mx-auto text-center reveal">
       <PaperCard color="#e6ddd0">
         <div class="px-6 sm:px-10 py-10">
@@ -738,7 +738,7 @@ export const prerender = true;
     gap: 0.3rem;
     padding: 0.6rem 0.4rem;
     font-family: 'Special Elite', monospace;
-    font-size: 0.65rem;
+    font-size: 0.72rem;
     color: #27864a;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
   }
@@ -802,5 +802,11 @@ export const prerender = true;
   @keyframes blink-cursor {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
+  }
+
+  @media (max-width: 639px) {
+    .cta-inner { padding: 1rem; }
+    .pricing-col { transform: none !important; }
+    .code-example-card { transform: none !important; }
   }
 </style>

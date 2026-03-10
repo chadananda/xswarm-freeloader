@@ -2,5 +2,8 @@ export { ProviderRepository } from './providers.js';
 export { ModelRepository } from './models.js';
 export { AccountRepository } from './accounts.js';
 export { AppRepository } from './apps.js';
+export { AppKeyRepository } from './app-keys.js';
+export { AppPolicyRepository } from './app-policies.js';
 export { UsageRepository } from './usage.js';
 export { BudgetRepository } from './budgets.js';
+export { SanitizationRepository } from './sanitization.js';

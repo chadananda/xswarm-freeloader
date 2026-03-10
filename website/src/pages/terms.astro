@@ -1,0 +1,104 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.svelte';
+import Footer from '../components/Footer.svelte';
+
+export const prerender = true;
+---
+<Base title="Terms of Service — Freeloader" description="Terms of Service for the Freeloader AI proxy router.">
+  <Nav client:load />
+  <div class="max-w-3xl mx-auto px-4 pt-28 pb-16">
+    <h1 class="text-3xl font-heading mb-2 text-ink">Terms of Service</h1>
+    <p class="text-faded font-body mb-2">Effective: March 9, 2026</p>
+    <p class="text-faded font-body mb-12">Last updated: March 9, 2026</p>
+
+    <div class="prose space-y-10">
+
+      <section>
+        <h2 class="text-xl font-heading text-ink mb-3">1. What Freeloader Is</h2>
+        <p class="text-faded font-body leading-relaxed">
+          Freeloader is an open-source, self-hosted, MIT-licensed software tool that runs on your local machine. It acts as an OpenAI-compatible proxy router, directing your AI requests to free-tier and low-cost providers to minimize your spending. Freeloader is not a hosted service — it is software you run yourself.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-heading text-ink mb-3">2. Acceptance</h2>
+        <p class="text-faded font-body leading-relaxed">
+          By installing, running, or otherwise using Freeloader you agree to these Terms. If you do not agree, do not use the software.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-heading text-ink mb-3">3. Geographic and Jurisdictional Restrictions</h2>
+        <div class="bg-paper border-2 border-dashed border-stamp/40 rounded-xl p-5 mb-4">
+          <p class="text-ink font-body leading-relaxed font-semibold">
+            Freeloader is not intended for use by residents of, or persons located in, the following jurisdictions:
+          </p>
+          <ul class="list-disc list-inside text-faded font-body mt-3 space-y-1.5">
+            <li><span class="text-ink font-semibold">California</span> (United States)</li>
+            <li><span class="text-ink font-semibold">Colorado</span> (United States)</li>
+            <li><span class="text-ink font-semibold">European Union</span> member states</li>
+            <li>Any other jurisdiction with unbridled government that requires the collection, processing, or disclosure of personal information, the implementation of consent mechanisms, or any form of user surveillance or data reporting as a condition of offering software or online services</li>
+          </ul>
+        </div>
+        <p class="text-faded font-body leading-relaxed">
+          These jurisdictions share a common trait: unbridled government with no meaningful theory of limited authority. Their regulatory frameworks presume that all software collects personal data and therefore must implement tracking, consent banners, data processing agreements, and reporting infrastructure. Freeloader collects no personal data. We have no ability to comply with regulations that assume we are doing something we are not, and we refuse to build surveillance infrastructure solely to satisfy bureaucracies that cannot conceive of software that respects its users by default.
+        </p>
+        <p class="text-faded font-body leading-relaxed mt-3">
+          If you are located in a restricted jurisdiction, you must not use Freeloader. We disclaim all liability arising from use of the software in violation of this section.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-heading text-ink mb-3">4. MIT License</h2>
+        <p class="text-faded font-body leading-relaxed">
+          Freeloader is distributed under the <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener" class="text-savings hover:underline">MIT License</a>. The full license text is included in the source repository. The MIT License governs your rights to use, copy, modify, and distribute the software.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-heading text-ink mb-3">5. Third-Party Providers</h2>
+        <p class="text-faded font-body leading-relaxed">
+          Freeloader routes your requests to third-party AI providers (Google, Groq, Mistral, OpenAI, Anthropic, etc.). Each provider has its own terms of service, usage policies, and rate limits. You are responsible for reading and complying with those terms. Freeloader does not guarantee the availability, accuracy, or performance of any third-party provider.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-heading text-ink mb-3">6. API Keys</h2>
+        <p class="text-faded font-body leading-relaxed">
+          You supply your own API keys for third-party providers. Your keys are stored locally on your machine in an encrypted SQLite database. Freeloader never transmits your API keys to our servers — we don't have servers that receive them. You are solely responsible for the security and proper use of your API keys.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-heading text-ink mb-3">7. No Warranty</h2>
+        <p class="text-faded font-body leading-relaxed">
+          THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-heading text-ink mb-3">8. Limitation of Liability</h2>
+        <p class="text-faded font-body leading-relaxed">
+          To the maximum extent permitted by applicable law, in no event shall the Freeloader authors, contributors, or xSwarm be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, or use, arising out of or in connection with this software. This includes, without limitation, any costs incurred from third-party AI provider usage, rate limit violations, or API key compromise.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-heading text-ink mb-3">9. Modifications</h2>
+        <p class="text-faded font-body leading-relaxed">
+          We may update these Terms from time to time. Changes will be reflected in the "Last updated" date above and published to this page. Continued use of Freeloader after changes constitutes acceptance of the revised Terms.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-heading text-ink mb-3">10. Contact</h2>
+        <p class="text-faded font-body leading-relaxed">
+          Questions about these Terms? Open an issue on <a href="https://github.com/chadananda/xswarm-freeloader" target="_blank" rel="noopener" class="text-savings hover:underline">GitHub</a>.
+        </p>
+      </section>
+
+    </div>
+  </div>
+  <Footer client:visible />
+</Base>

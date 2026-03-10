@@ -1,15 +1,16 @@
 // :ctx
-// :arch Fastify app with rate limiter, new cheapest-first scorer, account CRUD APIs, provider_stats recording
-// :why centralizes routing, auth, account management and usage tracking in one HTTP layer
-// :deps RateLimiter, selectRoute, detectCapabilities, applyQualityGates, executeWithFallback, accounts repo
-// :rules detectCapabilities auto-fills tools/vision gates; rateLimiter.recordRequest after success; provider_stats upserted per request
-// :edge no rateLimiter in context → skip; no budgetEnforcer.canAfford → skip that filter
-
+// :arch Fastify app with per-app policies, sanitization, degradation scoring, admin APIs
+// :why centralizes routing, auth, account/app/policy management and usage tracking in one HTTP layer
+// :deps RateLimiter, selectRoute, sanitizeRequest, appKeys, appPolicies, configManager, degradationScorer
+// :rules detectCapabilities auto-fills gates; sanitization runs before routing; request_id per request
+// :edge no rateLimiter → skip; no budgetEnforcer → skip; ?debug=routing for local introspection
+//
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import crypto from 'crypto';
 import { authenticateApiKey } from './auth.js';
 import { RateLimiter } from './rate-limiter.js';
-
+//
 export function createApp(context) {
   const fastify = Fastify({ logger: context.logger || false });
   fastify.register(cors, {
@@ -17,7 +18,7 @@ export function createApp(context) {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true
   });
-  fastify.addHook('onRequest', authenticateApiKey(context.apps));
+  fastify.addHook('onRequest', authenticateApiKey(context.apps, context.appKeys));
   fastify.setErrorHandler((error, request, reply) => {
     const statusCode = error.statusCode || 500;
     reply.status(statusCode).send({ error: { message: error.message || 'Internal server error', type: error.name || 'error', code: statusCode } });
@@ -49,37 +50,70 @@ export async function registerRoutes(app, context) {
 
   // Chat completions
   app.post('/v1/chat/completions', async (request, reply) => {
-    const { messages, model, stream, temperature, max_tokens, top_p, tools, tool_choice, response_format } = request.body;
-    const appData = request.app;
+    const requestId = crypto.randomUUID();
+    let { messages, model, stream, temperature, max_tokens, top_p, tools, tool_choice, response_format } = request.body;
+    let appData = request.app;
+    //
+    // Phase 2: support ?app_id= or ?service_id= for request identification
+    if (!appData && (request.query?.app_id || request.query?.service_id)) {
+      const lookupId = request.query.app_id || request.query.service_id;
+      appData = context.apps.get(lookupId);
+    }
+    //
+    // Phase 3: Sanitization
+    let sanitizationResult = null;
+    const profile = appData?.sanitization_profile || context.config?.sanitization?.defaultProfile || 'off';
+    if (profile !== 'off') {
+      const { sanitizeRequest } = await import('./sanitizer.js');
+      const sanitized = await sanitizeRequest(messages, profile, appData?.id, context.sanitizationRepo);
+      if (sanitized.blocked) {
+        reply.status(400).send({ error: { message: 'Request blocked by content policy', type: 'content_policy', request_id: requestId } });
+        return;
+      }
+      messages = sanitized.messages;
+      sanitizationResult = sanitized.result;
+    }
+    //
     // Budget check
     if (context.budgetEnforcer && appData) context.budgetEnforcer.checkBudget(appData.id, request.body.project_id || 'default', appData);
     // Auto-detect capabilities
     const { detectCapabilities } = await import('./quality-gates.js');
     const caps = detectCapabilities({ messages, tools });
-    // Get available models
     let candidates = context.models.getAll({ enabled: true });
-    // Apply quality gates
     const gates = { ...(context.config?.routing?.qualityGates || {}), ...caps };
     if (appData?.trust_tier) gates.trustTier = appData.trust_tier;
     const { applyQualityGates } = await import('./quality-gates.js');
     candidates = applyQualityGates(candidates, gates);
-    // If specific model requested, filter to it
     if (model) {
       const exact = candidates.find(m => m.id === model || m.name === model);
       if (exact) candidates = [exact];
     }
-    // Select route with cheapest-first (includes rate limiter, health, accounts filters)
+    //
+    // Phase 4: Load app policy
+    const appPolicy = appData && context.appPolicies ? context.appPolicies.get(appData.id) : null;
+    //
+    // Select route with all context
     const { selectRoute } = await import('./scorer.js');
     candidates = await selectRoute(candidates, { messages, tools, requiresTools: caps.requiresTools, requiresVision: caps.requiresVision }, {
-      trustTier: appData?.trust_tier,
-      db: context.db,
-      healthMonitor: context.healthMonitor,
-      accounts: context.accounts,
-      rateLimiter: context.rateLimiter,
-      budgetEnforcer: context.budgetEnforcer
+      trustTier: appData?.trust_tier, db: context.db, healthMonitor: context.healthMonitor,
+      accounts: context.accounts, rateLimiter: context.rateLimiter, budgetEnforcer: context.budgetEnforcer,
+      appPolicy, degradationScorer: context.degradationScorer,
+      sanitizationContext: sanitizationResult
     });
+    //
+    // Debug routing metadata (local/admin only)
+    const debugRouting = request.query?.debug === 'routing';
+    const routingDebug = debugRouting ? {
+      request_id: requestId, candidates_count: candidates.length,
+      candidates: candidates.slice(0, 5).map(c => ({ id: c.id, provider: c.provider_id, cost: c.pricing_input, degradation: c._degradationScore, latency: c._latency })),
+      app_policy: appPolicy ? { allowed_providers: appPolicy.allowed_providers, blocked_providers: appPolicy.blocked_providers } : null,
+      sanitization: sanitizationResult ? { profile, blocked: sanitizationResult.blocked, rules_fired: sanitizationResult.rules_fired } : null
+    } : null;
+    //
     if (candidates.length === 0) {
-      reply.status(503).send({ error: { message: 'No models available', type: 'no_providers' } });
+      const errorResponse = { error: { message: 'No models available', type: 'no_providers', request_id: requestId } };
+      if (routingDebug) errorResponse._routing_debug = routingDebug;
+      reply.status(503).send(errorResponse);
       return;
     }
     // Execute with fallback
@@ -96,6 +130,7 @@ export async function registerRoutes(app, context) {
       try {
         const res = await adapter.chatCompletion(messages, options, apiKey || '');
         context.healthMonitor?.recordSuccess(candidate.provider_id);
+        context.degradationScorer?.recordObservation(candidate.provider_id, candidate.id, { latencyMs: Date.now() - startTime, success: true, timeout: false });
         if (stream) {
           reply.raw.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive' });
           const reader = res.body.getReader();
@@ -112,6 +147,7 @@ export async function registerRoutes(app, context) {
         return res;
       } catch (err) {
         context.healthMonitor?.recordFailure(candidate.provider_id);
+        context.degradationScorer?.recordObservation(candidate.provider_id, candidate.id, { latencyMs: Date.now() - startTime, success: false, timeout: err.code === 'ETIMEDOUT' });
         throw err;
       }
     }, context.logger);
@@ -127,11 +163,15 @@ export async function registerRoutes(app, context) {
         app_id: appData?.id, project_id: request.body.project_id || 'default',
         provider_id: result.routing?.provider, model_id: result.routing?.model_id,
         tokens_in: result.usage?.prompt_tokens || 0, tokens_out: result.usage?.completion_tokens || 0,
-        latency_ms: latencyMs, cost_usd: cost, trust_tier: appData?.trust_tier
+        latency_ms: latencyMs, cost_usd: cost, trust_tier: appData?.trust_tier,
+        request_id: requestId, app_key_id: request.appKey?.id || null,
+        sanitization_action: sanitizationResult?.action_taken || null,
+        routing_metadata: debugRouting ? routingDebug : null
       });
       if (context.budgetEnforcer && appData) context.budgetEnforcer.recordUsage(appData.id, request.body.project_id || 'default', cost);
-      // Upsert provider_stats
       _recordProviderStats(context.db, usedModel, latencyMs, result.usage || {});
+      // Attach debug routing to response
+      if (routingDebug) result._routing_debug = routingDebug;
     }
     return result;
   });
@@ -156,12 +196,77 @@ export async function registerRoutes(app, context) {
 
   app.get('/api/providers', async () => {
     const providers = context.providers?.getAll() || [];
-    return providers.map(p => ({ ...p, models: context.models?.getByProvider(p.id) || [], health: context.healthMonitor?.getCircuit(p.id) || null }));
+    const degradationScores = context.degradationScorer?.getAllScores() || {};
+    return providers.map(p => ({
+      ...p, models: context.models?.getByProvider(p.id) || [],
+      health: context.healthMonitor?.getCircuit(p.id) || null,
+      degradation: degradationScores[p.id] || null
+    }));
   });
 
   app.get('/api/apps', async () => context.apps?.getAll() || []);
   app.post('/api/apps', async (request) => context.apps?.create(request.body));
   app.delete('/api/apps/:id', async (request) => { context.apps?.delete(request.params.id); return { ok: true }; });
+  app.put('/api/apps/:id', async (request) => context.apps?.update(request.params.id, request.body));
+  //
+  // Phase 1: App key management
+  app.get('/api/apps/:id/keys', async (request) => context.appKeys?.getByApp(request.params.id) || []);
+  //
+  app.post('/api/apps/:id/keys', async (request, reply) => {
+    const { generateAppApiKey } = await import('../utils/crypto.js');
+    const { key, hash, prefix } = generateAppApiKey();
+    const keyRecord = context.appKeys?.create({
+      appId: request.params.id, keyHash: hash, keyPrefix: prefix,
+      permissions: request.body.permissions, rateLimitRps: request.body.rate_limit_rps,
+      rateLimitRpm: request.body.rate_limit_rpm, tokenQuotaDaily: request.body.token_quota_daily,
+      tokenQuotaMonthly: request.body.token_quota_monthly, costQuotaDaily: request.body.cost_quota_daily,
+      costQuotaMonthly: request.body.cost_quota_monthly
+    });
+    return { ...keyRecord, key }; // Return raw key only once
+  });
+  //
+  app.delete('/api/apps/:id/keys/:keyId', async (request) => {
+    const revoked = context.appKeys?.revoke(parseInt(request.params.keyId));
+    return { ok: revoked };
+  });
+  //
+  app.post('/api/apps/:id/keys/:keyId/rotate', async (request) => {
+    const { generateAppApiKey } = await import('../utils/crypto.js');
+    const { key, hash, prefix } = generateAppApiKey();
+    const newKey = context.appKeys?.rotate(parseInt(request.params.keyId), hash, prefix);
+    if (!newKey) return { ok: false, error: 'Key not found' };
+    return { ...newKey, key }; // Return raw key only once
+  });
+  //
+  // Phase 2: Per-app stats and detail
+  app.get('/api/apps/:id/stats', async (request) => {
+    const appId = request.params.id;
+    const app = context.apps?.get(appId);
+    if (!app) return { error: 'App not found' };
+    const dayAgo = Math.floor(Date.now() / 1000) - 86400;
+    return {
+      app, keys: context.appKeys?.getByApp(appId) || [],
+      stats: { today: context.usage?.getStats(appId, 'day'), month: context.usage?.getStats(appId, 'month') },
+      costByProvider: context.usage?.getCostByProviderForApp(appId, dayAgo) || []
+    };
+  });
+  //
+  app.get('/api/apps/:id/usage', async (request) => {
+    const days = parseInt(request.query?.days) || 30;
+    return context.usage?.getTimeseriesByApp(request.params.id, days) || [];
+  });
+  //
+  // Phase 4: App policy CRUD
+  app.get('/api/apps/:id/policy', async (request) => context.appPolicies?.get(request.params.id) || {});
+  //
+  app.put('/api/apps/:id/policy', async (request) => {
+    return context.appPolicies?.upsert(request.params.id, request.body) || {};
+  });
+  //
+  app.delete('/api/apps/:id/policy', async (request) => {
+    const deleted = context.appPolicies?.delete(request.params.id);
+    return { ok: deleted };
+  });
 
   app.get('/api/usage', async (request) => {
     const limit = parseInt(request.query.limit) || 50;
@@ -169,6 +274,33 @@ export async function registerRoutes(app, context) {
   });
 
   app.get('/api/settings', async () => ({ config: context.config, health: context.healthMonitor?.getStatus() || {} }));
+  //
+  // Phase 6: Config management API
+  app.get('/api/config', async () => context.configManager?.getCurrent() || context.config);
+  //
+  app.put('/api/config', async (request) => {
+    const updated = context.configManager?.update(request.body, request.dashboardUser?.name || 'api', request.body._description || '');
+    if (updated) context.config = updated; // Update live config
+    return updated || context.config;
+  });
+  //
+  app.get('/api/config/versions', async (request) => {
+    const limit = parseInt(request.query?.limit) || 20;
+    return context.configManager?.listVersions(limit) || [];
+  });
+  //
+  app.post('/api/config/rollback/:id', async (request) => {
+    const version = parseInt(request.params.id);
+    const rolled = context.configManager?.rollback(version, request.dashboardUser?.name || 'api');
+    if (rolled) context.config = rolled;
+    return rolled || { error: 'Rollback failed' };
+  });
+  //
+  // Phase 2: Top apps analytics
+  app.get('/api/usage/top-apps', async (request) => {
+    const since = Math.floor(Date.now() / 1000) - (parseInt(request.query?.days) || 30) * 86400;
+    return context.usage?.getTopApps(since, parseInt(request.query?.limit) || 10) || [];
+  });
 
   // Account CRUD API
   app.get('/api/accounts', async () => {
@@ -215,10 +347,80 @@ export async function registerRoutes(app, context) {
     }
   });
 
+  // Usage analytics endpoints
+  app.get('/api/usage/timeseries', async (request) => context.usage?.getTimeseries(parseInt(request.query.days) || 30) || []);
+
+  app.get('/api/usage/by-provider', async () => {
+    const since = Math.floor(Date.now() / 1000) - 30 * 86400;
+    return context.usage?.getByProviderAggregated(since) || [];
+  });
+
+  app.post('/api/accounts/backup', async (request, reply) => {
+    if (!context.mailer?.isConfigured()) { reply.status(503).send({ error: { message: 'Email not configured' } }); return; }
+    const { encryptApiKey } = await import('../utils/crypto.js');
+    const accounts = context.accounts?.getAll() || [];
+    const bundle = JSON.stringify(accounts.map(a => ({ id: a.id, provider_id: a.provider_id, api_key: a.api_key })));
+    const encrypted = encryptApiKey(bundle);
+    const to = context.config?.email?.reportTo || context.config?.email?.smtp?.user;
+    if (!to) { reply.status(503).send({ error: { message: 'No recipient email configured' } }); return; }
+    await context.mailer.send(to, 'xswarm-freeloader: API Key Backup', '<p>Encrypted backup attached.</p>', [{ filename: 'backup.json', content: JSON.stringify(encrypted) }]);
+    return { ok: true, sent_to: to };
+  });
+
   // Rate limit usage per model
   app.get('/api/rate-limits', async () => {
     const models = context.models?.getAll({ enabled: true }) || [];
     return models.reduce((acc, m) => { acc[m.id] = context.rateLimiter?.getUsage(m.id) || null; return acc; }, {});
+  });
+  //
+  // Local reports — generated on this machine, saved to ~/.xswarm/reports/
+  app.get('/api/reports', async () => {
+    if (!context.reportStore) return [];
+    return context.reportStore.list().map(f => ({ filename: f, date: f.replace('xswarm-report-', '').replace('.pdf', '') }));
+  });
+  //
+  app.get('/api/reports/latest', async (request, reply) => {
+    if (!context.reportStore) { reply.status(503).send({ error: { message: 'Report store not configured' } }); return; }
+    const report = context.reportStore.getLatest();
+    if (!report) { reply.status(404).send({ error: { message: 'No reports generated yet' } }); return; }
+    reply.header('Content-Type', 'application/pdf');
+    reply.header('Content-Disposition', `attachment; filename="${report.name}"`);
+    return reply.send(report.buffer);
+  });
+  //
+  app.get('/api/reports/:date', async (request, reply) => {
+    if (!context.reportStore) { reply.status(503).send({ error: { message: 'Report store not configured' } }); return; }
+    const report = context.reportStore.getByDate(request.params.date);
+    if (!report) { reply.status(404).send({ error: { message: 'Report not found' } }); return; }
+    reply.header('Content-Type', 'application/pdf');
+    reply.header('Content-Disposition', `attachment; filename="${report.name}"`);
+    return reply.send(report.buffer);
+  });
+  //
+  app.post('/api/reports/generate', async (request, reply) => {
+    if (!context.digestBuilder) { reply.status(503).send({ error: { message: 'Report generator not configured' } }); return; }
+    const digest = await context.digestBuilder.buildDaily();
+    const result = { ok: true, savedPath: digest.savedPath };
+    // Optionally email if mailer available and recipient configured
+    const to = context.config?.email?.to || context.config?.email?.reportTo;
+    if (to && context.mailer?.isConfigured()) {
+      await context.mailer.send(to, digest.subject, digest.html, digest.attachments);
+      result.emailed = to;
+    }
+    return result;
+  });
+  //
+  // Test report — generates multi-range report and sends via configured email
+  app.post('/api/reports/test', async (request, reply) => {
+    if (!context.digestBuilder) { reply.status(503).send({ error: { message: 'Report generator not configured' } }); return; }
+    const digest = await context.digestBuilder.buildReport();
+    const result = { ok: true, savedPath: digest.savedPath };
+    const to = context.config?.email?.to;
+    if (to && context.mailer?.isConfigured()) {
+      await context.mailer.send(to, digest.subject, digest.html, digest.attachments);
+      result.emailed = to;
+    }
+    return result;
   });
 
   // Dashboard auth

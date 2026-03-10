@@ -5,6 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>xswarm freeloader — dashboard</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐝</text></svg>" />
+    <style>
+      @font-face {
+        font-family: 'Permanent Marker';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('https://fonts.gstatic.com/s/permanentmarker/v16/Fh4uPib9Iyv2ucM6pGQMWimMp004La2Cfw.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Special Elite';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('https://fonts.gstatic.com/s/specialelite/v18/XLYgIZbkc46tvqgoxjTotC-mRDQB.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Source Sans 3';
+        font-style: normal;
+        font-weight: 300 700;
+        font-display: swap;
+        src: url('https://fonts.gstatic.com/s/sourcesans3/v15/nwpBtKy2OAdR1K-IwhWudF-R9QMylBJAV3Bo8Ky461EN.woff2') format('woff2');
+      }
+      :root {
+        --dash-bg: #1a1816;
+        --dash-card: #252220;
+        --dash-border: #3a3530;
+        --dash-text: #c8bdb6;
+        --dash-muted: #8a7f78;
+        --dash-green: #27864a;
+        --dash-orange: #d4831a;
+        --dash-blue: #4a6fa8;
+        --dash-red: #c0392b;
+      }
+      body { margin: 0; background: var(--dash-bg); color: var(--dash-text); font-family: 'Source Sans 3', sans-serif; }
+    </style>
   </head>
   <body>
     <div id="app"></div>

@@ -134,4 +134,8 @@
   .hamburger { color: #8b8579; transition: color 0.2s ease; }
   .hamburger:hover { color: #2d2a26; }
   .mobile-menu { position: relative; z-index: 1; border-top: 1px solid rgba(0,0,0,0.06); }
+
+  @media (max-width: 639px) {
+    .logo-terminal { font-size: 14px; }
+  }
 </style>

@@ -1,12 +1,16 @@
 <script>
+  // :arch: apps view — create/delete apps, view API keys, per-app budgets
+  // :why: DashboardCard wrapping for consistent dark paper theme
   import { onMount } from 'svelte'
   import { api } from '../lib/api.js'
+  import { navigate } from '../lib/router.js'
+  import DashboardCard from '../components/DashboardCard.svelte'
 
   let apps = $state([])
   let error = $state('')
   let showCreate = $state(false)
   let creating = $state(false)
-  let form = $state({ name: '', trust_tier: 'standard', budget_day: '', budget_month: '' })
+  let form = $state({ name: '', trust_tier: 'standard', budget_day: '', budget_month: '', sanitization_profile: 'off' })
   let copiedKey = $state('')
 
   const tiers = ['trusted', 'standard', 'experimental']
@@ -26,9 +30,10 @@
         name: form.name,
         trust_tier: form.trust_tier,
         budget_day: form.budget_day ? Number(form.budget_day) : null,
-        budget_month: form.budget_month ? Number(form.budget_month) : null
+        budget_month: form.budget_month ? Number(form.budget_month) : null,
+        sanitization_profile: form.sanitization_profile
       })
-      form = { name: '', trust_tier: 'standard', budget_day: '', budget_month: '' }
+      form = { name: '', trust_tier: 'standard', budget_day: '', budget_month: '', sanitization_profile: 'off' }
       showCreate = false
       await loadApps()
     } catch (err) {
@@ -43,9 +48,7 @@
     try {
       await api.deleteApp(id)
       await loadApps()
-    } catch (err) {
-      error = err.message
-    }
+    } catch (err) { error = err.message }
   }
 
   function copyKey(key) {
@@ -53,83 +56,105 @@
     copiedKey = key
     setTimeout(() => { copiedKey = '' }, 2000)
   }
+
+  const tierStyle = (tier) =>
+    tier === 'trusted' ? 'background:rgba(39,134,74,0.2); color:#27864a;' :
+    tier === 'standard' ? 'background:rgba(74,111,168,0.2); color:#4a6fa8;' :
+    'background:rgba(212,131,26,0.2); color:#d4831a;'
+
+  const inputStyle = "background:#2e2a27; border:1px solid #3a3530; border-radius:6px; padding:0.45rem 0.75rem; font-size:0.85rem; color:#c8bdb6; outline:none; width:100%;"
 </script>
 
-<div>
-  <div class="flex items-center justify-between mb-6">
+<div class="space-y-5">
+  <div style="display:flex; align-items:center; justify-content:space-between;">
     <div>
-      <h1 class="text-xl font-bold text-white">Apps</h1>
-      <p class="text-gray-400 text-sm">manage your API consumers</p>
+      <h1 class="text-lg font-bold" style="font-family:'Permanent Marker',cursive; color:#27864a;">Apps</h1>
+      <p style="color:#8a7f78; font-size:0.78rem;">manage your API consumers</p>
     </div>
-    <button onclick={() => { showCreate = !showCreate }} class="bg-green-600 hover:bg-green-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+    <button onclick={() => { showCreate = !showCreate }}
+      style="background:#27864a; color:#fff; font-size:0.8rem; font-weight:600; padding:0.4rem 1rem; border-radius:6px; border:none; cursor:pointer;">
       + new app
     </button>
   </div>
   {#if error}
-    <div class="text-red-400 text-sm bg-red-900/30 border border-red-800 rounded-lg p-3 mb-4">{error}</div>
+    <div style="color:#c0392b; font-size:0.75rem; background:rgba(192,57,43,0.1); border:1px solid rgba(192,57,43,0.3); border-radius:6px; padding:0.4rem 0.75rem;">{error}</div>
   {/if}
   {#if showCreate}
-    <form onsubmit={createApp} class="bg-gray-800 rounded-xl border border-gray-700 p-5 mb-6">
-      <h2 class="text-sm font-semibold text-gray-300 mb-4">new app</h2>
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label class="block text-xs text-gray-400 mb-1">App name</label>
-          <input bind:value={form.name} required placeholder="my-cool-app" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500" />
+    <DashboardCard title="New app" accent="green">
+      <form onsubmit={createApp}>
+        <div class="grid grid-cols-2 gap-4" style="margin-bottom:1rem;">
+          <div>
+            <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">App name</label>
+            <input bind:value={form.name} required placeholder="my-cool-app" style={inputStyle} />
+          </div>
+          <div>
+            <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Trust tier</label>
+            <select bind:value={form.trust_tier} style={inputStyle}>
+              {#each tiers as t}<option value={t}>{t}</option>{/each}
+            </select>
+          </div>
+          <div>
+            <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Daily budget ($, optional)</label>
+            <input type="number" step="0.01" bind:value={form.budget_day} placeholder="0.50" style={inputStyle} />
+          </div>
+          <div>
+            <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Monthly budget ($, optional)</label>
+            <input type="number" step="0.01" bind:value={form.budget_month} placeholder="5.00" style={inputStyle} />
+          </div>
+          <div>
+            <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Sanitization</label>
+            <select bind:value={form.sanitization_profile} style={inputStyle}>
+              <option value="off">off</option>
+              <option value="standard">standard</option>
+              <option value="aggressive">aggressive</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label class="block text-xs text-gray-400 mb-1">Trust tier</label>
-          <select bind:value={form.trust_tier} class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-green-500">
-            {#each tiers as t}<option value={t}>{t}</option>{/each}
-          </select>
+        <div style="display:flex; gap:0.75rem;">
+          <button type="submit" disabled={creating}
+            style="background:#27864a; color:#fff; font-size:0.8rem; font-weight:600; padding:0.4rem 1rem; border-radius:6px; border:none; cursor:pointer; opacity:{creating ? 0.6 : 1};">
+            {creating ? 'creating...' : 'create app'}
+          </button>
+          <button type="button" onclick={() => { showCreate = false }}
+            style="background:#2e2a27; color:#c8bdb6; font-size:0.8rem; padding:0.4rem 1rem; border-radius:6px; border:none; cursor:pointer;">
+            cancel
+          </button>
         </div>
-        <div>
-          <label class="block text-xs text-gray-400 mb-1">Daily budget ($, optional)</label>
-          <input type="number" step="0.01" bind:value={form.budget_day} placeholder="0.50" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500" />
-        </div>
-        <div>
-          <label class="block text-xs text-gray-400 mb-1">Monthly budget ($, optional)</label>
-          <input type="number" step="0.01" bind:value={form.budget_month} placeholder="5.00" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-green-500" />
-        </div>
-      </div>
-      <div class="flex gap-3">
-        <button type="submit" disabled={creating} class="bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-          {creating ? 'creating...' : 'create app'}
-        </button>
-        <button type="button" onclick={() => { showCreate = false }} class="text-gray-400 hover:text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">cancel</button>
-      </div>
-    </form>
+      </form>
+    </DashboardCard>
   {/if}
   <div class="space-y-3">
     {#each apps as app}
-      <div class="bg-gray-800 rounded-xl border border-gray-700 p-5">
-        <div class="flex items-start justify-between mb-3">
+      <DashboardCard accent="blue">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:0.75rem;">
           <div>
-            <span class="font-medium text-white">{app.name}</span>
-            <span class="ml-2 px-2 py-0.5 rounded-full text-xs
-              {app.trust_tier === 'trusted' ? 'bg-green-900/50 text-green-400' :
-               app.trust_tier === 'standard' ? 'bg-blue-900/50 text-blue-400' :
-               'bg-yellow-900/50 text-yellow-400'}">{app.trust_tier}</span>
+            <span onclick={() => navigate(`#/apps/${app.id}`)} style="font-weight:600; color:#c8bdb6; cursor:pointer; text-decoration:underline; text-decoration-color:#3a3530;">{app.name}</span>
+            <span style="margin-left:0.5rem; padding:0.15rem 0.5rem; border-radius:10px; font-size:0.65rem; {tierStyle(app.trust_tier)}">{app.trust_tier}</span>
           </div>
-          <button onclick={() => deleteApp(app.id)} class="text-gray-500 hover:text-red-400 text-sm transition-colors">delete</button>
+          <button onclick={() => deleteApp(app.id)}
+            style="color:#8a7f78; font-size:0.78rem; background:none; border:none; cursor:pointer;">delete</button>
         </div>
-        <div class="flex items-center gap-2 bg-gray-700/50 rounded-lg px-3 py-2 mb-3">
-          <code class="text-xs text-gray-300 flex-1 truncate">{app.api_key}</code>
-          <button onclick={() => copyKey(app.api_key)} class="text-xs {copiedKey === app.api_key ? 'text-green-400' : 'text-gray-400 hover:text-white'} transition-colors">
+        <div style="display:flex; align-items:center; gap:0.5rem; background:#2e2a27; border-radius:6px; padding:0.4rem 0.75rem; margin-bottom:0.75rem;">
+          <code style="font-size:0.72rem; color:#c8bdb6; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{app.api_key?.substring(0, 8)}...</code>
+          <button onclick={() => copyKey(app.api_key)}
+            style="font-size:0.7rem; background:none; border:none; cursor:pointer; color:{copiedKey === app.api_key ? '#27864a' : '#8a7f78'};">
             {copiedKey === app.api_key ? 'copied!' : 'copy'}
           </button>
         </div>
-        <div class="flex gap-4 text-xs text-gray-400">
-          {#if app.budget_day}<span>daily limit: <span class="text-white">${app.budget_day}</span></span>{/if}
-          {#if app.budget_month}<span>monthly limit: <span class="text-white">${app.budget_month}</span></span>{/if}
-          <span>requests today: <span class="text-blue-400">{app.requests_today ?? 0}</span></span>
-          <span>cost today: <span class="text-red-400">${(app.cost_today ?? 0).toFixed(4)}</span></span>
+        <div style="display:flex; gap:1rem; font-size:0.72rem; color:#8a7f78; flex-wrap:wrap;">
+          {#if app.budget_day}<span>daily limit: <span style="color:#c8bdb6;">${app.budget_day}</span></span>{/if}
+          {#if app.budget_month}<span>monthly limit: <span style="color:#c8bdb6;">${app.budget_month}</span></span>{/if}
+          <span>requests today: <span style="color:#4a6fa8;">{app.requests_today ?? 0}</span></span>
+          <span>cost today: <span style="color:#c0392b;">${(app.cost_today ?? 0).toFixed(4)}</span></span>
         </div>
-      </div>
+      </DashboardCard>
     {:else}
-      <div class="text-center text-gray-500 py-12 bg-gray-800 rounded-xl border border-gray-700">
-        <div class="text-3xl mb-2">📦</div>
-        <div class="text-sm">no apps yet — create one to start freeloading</div>
-      </div>
+      <DashboardCard accent="orange">
+        <div style="text-align:center; padding:2rem 0;">
+          <div style="font-size:2rem; margin-bottom:0.5rem;">📦</div>
+          <div style="font-size:0.85rem; color:#8a7f78;">no apps yet — create one to start freeloading</div>
+        </div>
+      </DashboardCard>
     {/each}
   </div>
 </div>

@@ -2,7 +2,7 @@
   <div class="paper-footer__back"></div>
   <div class="paper-footer__front"></div>
   <div class="paper-footer__grain"></div>
-  <div class="paper-footer__inner max-w-5xl mx-auto py-16 px-4">
+  <div class="paper-footer__inner max-w-5xl mx-auto py-10 sm:py-16 px-4">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
       <div class="col-span-2 md:col-span-1">
         <div class="font-heading text-2xl mb-3 flex items-center gap-1">
@@ -38,7 +38,11 @@
     </div>
     <div class="mt-10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4" style="border-top: 1px solid rgba(180,170,155,0.3);">
       <p class="font-typewriter text-xs text-faded">be a freeloader: <span class="text-savings">npx freeloader.xswarm.ai</span></p>
-      <p class="font-typewriter text-xs text-faded">&copy; 2025 xswarm. Open source forever.</p>
+      <div class="flex items-center gap-4 font-typewriter text-xs text-faded">
+        <a href="/terms" class="hover:text-coupon transition-colors">Terms</a>
+        <a href="/privacy" class="hover:text-coupon transition-colors">Privacy</a>
+        <span>&copy; 2025 xswarm. Open source forever.</span>
+      </div>
     </div>
   </div>
 </footer>

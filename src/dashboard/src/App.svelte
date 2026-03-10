@@ -12,8 +12,9 @@
   import Usage from './views/Usage.svelte'
   import Opportunities from './views/Opportunities.svelte'
   import Settings from './views/Settings.svelte'
+  import AppDetail from './views/AppDetail.svelte'
 
-  const views = { Login, Overview, Providers, Apps, Accounts, Routing, Usage, Opportunities, Settings }
+  const views = { Login, Overview, Providers, Apps, AppDetail, Accounts, Routing, Usage, Opportunities, Settings }
 
   let auth = $state(false)
   let view = $state('Overview')
@@ -35,7 +36,7 @@
   })
 </script>
 
-<div class="flex h-screen bg-gray-900 text-white overflow-hidden">
+<div class="flex h-screen overflow-hidden" style="background:#1a1816; color:#c8bdb6;">
   {#if auth && view !== 'Login'}
     <Nav {view} />
     <main class="flex-1 overflow-y-auto p-6">

@@ -140,7 +140,7 @@
         </div>
       </div>
 
-      <div class="flex items-center justify-center gap-6 sm:gap-12 mb-10">
+      <div class="flex flex-col items-center gap-4 sm:flex-row sm:gap-12 mb-10">
         <!-- Provider count -->
         <div class="hero-card" style="transform: rotate(-2deg);">
           <div class="hero-card__back"></div>
@@ -148,14 +148,14 @@
             <div class="hero-card__grain"></div>
           </div>
           <div class="hero-card__content">
-            <div class="font-heading text-5xl sm:text-6xl text-ink leading-none text-center">
+            <div class="font-heading text-4xl sm:text-6xl text-ink leading-none text-center">
               {mounted ? providerCount : 20}+
             </div>
             <div class="font-typewriter text-xs text-faded mt-2 tracking-wider uppercase text-center">providers</div>
           </div>
         </div>
 
-        <div class="text-4xl sm:text-5xl select-none" style="color: #c4b8a0;">/</div>
+        <div class="hidden sm:block text-4xl sm:text-5xl select-none" style="color: #c4b8a0;">/</div>
 
         <!-- Model count -->
         <div class="hero-card" style="transform: rotate(1.5deg);">
@@ -164,14 +164,14 @@
             <div class="hero-card__grain"></div>
           </div>
           <div class="hero-card__content">
-            <div class="font-heading text-5xl sm:text-6xl text-ink leading-none text-center">
+            <div class="font-heading text-4xl sm:text-6xl text-ink leading-none text-center">
               {mounted ? modelCount : 60}+
             </div>
             <div class="font-typewriter text-xs text-faded mt-2 tracking-wider uppercase text-center">models</div>
           </div>
         </div>
 
-        <div class="text-4xl sm:text-5xl select-none" style="color: #c4b8a0;">/</div>
+        <div class="hidden sm:block text-4xl sm:text-5xl select-none" style="color: #c4b8a0;">/</div>
 
         <!-- $0 cost tag -->
         <div class="hero-card hero-card--green" style="transform: rotate(-1deg);">
@@ -180,7 +180,7 @@
             <div class="hero-card__grain"></div>
           </div>
           <div class="hero-card__content">
-            <div class="font-heading text-6xl sm:text-7xl leading-none text-center" style="color: #27864a;">$0</div>
+            <div class="font-heading text-4xl sm:text-7xl leading-none text-center" style="color: #27864a;">$0</div>
             <div class="font-typewriter text-xs text-faded mt-2 tracking-wider uppercase text-center">monthly cost</div>
           </div>
         </div>
@@ -198,7 +198,8 @@
       </p>
     </div>
 
-    <div class="max-w-3xl mx-auto mb-12">
+    <div class="sm:hidden font-heading text-3xl text-ink text-center mb-4">FREELOADER</div>
+    <div class="max-w-3xl mx-auto mb-12 transform sm:scale-100 scale-[0.7] origin-top">
       <Terminal {lines} {delays} />
     </div>
 
@@ -230,7 +231,7 @@
     mix-blend-mode: multiply; opacity: 0.7; border-radius: inherit;
   }
 
-  .hero-card { position: relative; min-width: 100px; }
+  .hero-card { position: relative; }
   .hero-card__back, .hero-card__front {
     position: absolute; inset: 0; background-color: #f0ebe0;
     background-image: var(--paper-surface); background-size: 200px, 100%;
@@ -282,5 +283,10 @@
     font-size: 0.8rem; color: #8b8579; padding: 0.2rem 0.7rem;
     display: inline-flex; align-items: center; gap: 0.35rem;
     text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+  }
+
+  @media (max-width: 639px) {
+    .hero-card { width: 100%; }
+    .hero-card__content { padding: 0.8rem 1rem 0.6rem; }
   }
 </style>

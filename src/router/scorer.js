@@ -1,10 +1,10 @@
 // :ctx
-// :arch cheapest-first router scorer with cascading capability/trust/availability filters
-// :why replaces weighted scoring; free-tier models at $0 cost route first; latency as tiebreaker
-// :deps rate-limiter (canRequest), context.db (provider_stats), context.healthMonitor, context.accounts
-// :rules all 7 filters applied in order; effectiveCost=0 for free-tier; old exports kept as thin wrappers
+// :arch cheapest-first router scorer with cascading capability/trust/policy/availability filters
+// :why replaces weighted scoring; free-tier models at $0 cost route first; degradation + latency as tiebreaker
+// :deps rate-limiter, context.db, healthMonitor, accounts, appPolicy, degradationScorer
+// :rules all filters applied in order; effectiveCost=0 for free-tier; meetsAppPolicy after trust tier
 // :edge no db → use heuristic latency; no rateLimiter in context → skip rate filter
-
+//
 const TRUST_RANK = { private: 3, standard: 2, open: 1 };
 const LATENCY_HEURISTIC = { local: 50, groq: 200, cerebras: 200 };
 
@@ -61,23 +61,58 @@ async function latencyScore(m, db) {
   return LATENCY_HEURISTIC[m.provider_id] || 500;
 }
 
+// meetsAppPolicy: check allowed/blocked providers, allowed models, data residency, max cost
+export function meetsAppPolicy(m, policy) {
+  if (!policy) return true;
+  if (policy.allowed_providers) {
+    const allowed = Array.isArray(policy.allowed_providers) ? policy.allowed_providers : [];
+    if (allowed.length > 0 && !allowed.includes(m.provider_id)) return false;
+  }
+  if (policy.blocked_providers) {
+    const blocked = Array.isArray(policy.blocked_providers) ? policy.blocked_providers : [];
+    if (blocked.includes(m.provider_id)) return false;
+  }
+  if (policy.allowed_models) {
+    const models = Array.isArray(policy.allowed_models) ? policy.allowed_models : [];
+    if (models.length > 0 && !models.includes(m.id) && !models.includes(m.name)) return false;
+  }
+  if (policy.data_residency === 'local' && !m.is_local) return false;
+  if (policy.max_cost_per_request != null) {
+    const costPer1k = effectiveCost(m);
+    if (costPer1k > policy.max_cost_per_request * 1000000) return false; // cost is per 1M tokens
+  }
+  return true;
+}
+//
 // selectRoute: main entry point, returns sorted filtered candidates
 export async function selectRoute(candidates, request, context = {}) {
-  const { trustTier, db, healthMonitor, accounts, rateLimiter, budgetEnforcer } = context;
+  const { trustTier, db, healthMonitor, accounts, rateLimiter, budgetEnforcer, appPolicy, degradationScorer, sanitizationContext } = context;
   const estimatedTokens = estimateTokens(request);
   // Apply filters in cascade order
   let filtered = candidates
     .filter(m => meetsCapabilities(m, request))
     .filter(m => meetsTrustTier(m, trustTier))
+    .filter(m => meetsAppPolicy(m, appPolicy))
     .filter(m => !healthMonitor || healthMonitor.isAvailable(m.provider_id))
     .filter(m => hasApiKey(m.provider_id, accounts))
     .filter(m => !rateLimiter || rateLimiter.canRequest(m.id, estimatedTokens).allowed)
     .filter(m => !budgetEnforcer || budgetEnforcer.canAfford?.(m, estimatedTokens) !== false);
-  // Attach latency scores async then sort cheapest-first, tiebreak by latency
-  const withLatency = await Promise.all(filtered.map(async m => ({ ...m, _latency: await latencyScore(m, db) })));
-  return withLatency.sort((a, b) => {
+  // Sanitization context: force local if PII detected and policy requires it
+  if (sanitizationContext?.pii_detected && appPolicy?.force_local_on_pii) {
+    filtered = filtered.filter(m => m.is_local);
+  }
+  // Attach latency + degradation scores async then sort
+  const withScores = await Promise.all(filtered.map(async m => ({
+    ...m,
+    _latency: await latencyScore(m, db),
+    _degradationScore: degradationScorer ? degradationScorer.getScore(m.provider_id) : 1.0
+  })));
+  return withScores.sort((a, b) => {
     const costDiff = effectiveCost(a) - effectiveCost(b);
     if (costDiff !== 0) return costDiff;
+    // Degradation tiebreak: if scores differ by >0.1, prefer higher score
+    const degradDiff = b._degradationScore - a._degradationScore;
+    if (Math.abs(degradDiff) > 0.1) return degradDiff > 0 ? 1 : -1;
     return a._latency - b._latency;
   });
 }

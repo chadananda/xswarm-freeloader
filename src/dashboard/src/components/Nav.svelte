@@ -1,4 +1,6 @@
 <script>
+  // :arch: sidebar nav — dark paper theme with Permanent Marker branding
+  // :why: matches DashboardCard dark palette; active state uses green accent
   import { navigate } from '../lib/router.js'
   import { clearToken } from '../lib/stores.js'
 
@@ -21,34 +23,33 @@
   }
 </script>
 
-<aside class="w-56 bg-gray-800 border-r border-gray-700 flex flex-col">
-  <div class="p-4 border-b border-gray-700">
-    <div class="flex items-center gap-2">
-      <span class="text-2xl">🐝</span>
+<aside style="width:14rem; background:#1e1c1a; border-right:1px solid #3a3530; display:flex; flex-direction:column; flex-shrink:0;">
+  <div style="padding:1rem; border-bottom:1px solid #3a3530;">
+    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
+      <span style="font-size:1.5rem;">🐝</span>
       <div>
-        <div class="font-bold text-green-400 text-sm leading-tight">xswarm</div>
-        <div class="text-gray-400 text-xs leading-tight">freeloader</div>
+        <div style="font-family:'Permanent Marker',cursive; color:#27864a; font-size:0.85rem; line-height:1.1;">xswarm</div>
+        <div style="font-family:'Special Elite',serif; color:#8a7f78; font-size:0.7rem; line-height:1;">freeloader</div>
       </div>
     </div>
-    <div class="text-xs text-gray-500 mt-1">your free tiers, working hard</div>
+    <div style="font-size:0.65rem; color:#5a5248; font-family:'Special Elite',serif;">your free tiers, working hard</div>
   </div>
-  <nav class="flex-1 p-2">
+  <nav style="flex:1; padding:0.5rem;">
     {#each links as link}
       <button
         onclick={() => navigate(link.hash)}
-        class="w-full text-left px-3 py-2 rounded-lg mb-1 text-sm flex items-center gap-2 transition-colors
-          {view === link.label ? 'bg-gray-700 text-white font-medium' : 'text-gray-400 hover:bg-gray-700 hover:text-white'}"
+        style="width:100%; text-align:left; padding:0.45rem 0.75rem; border-radius:6px; margin-bottom:0.15rem; font-size:0.82rem; display:flex; align-items:center; gap:0.5rem; border:none; cursor:pointer; transition:background 0.15s;
+          background:{view === link.label ? '#2e2a27' : 'transparent'};
+          color:{view === link.label ? '#27864a' : '#8a7f78'};"
       >
-        <span>{link.icon}</span>
-        <span>{link.label}</span>
+        <span style="font-size:0.9rem;">{link.icon}</span>
+        <span style="font-family:'Special Elite',serif;">{link.label}</span>
       </button>
     {/each}
   </nav>
-  <div class="p-2 border-t border-gray-700">
-    <button
-      onclick={logout}
-      class="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-400 hover:bg-gray-700 hover:text-red-400 transition-colors flex items-center gap-2"
-    >
+  <div style="padding:0.5rem; border-top:1px solid #3a3530;">
+    <button onclick={logout}
+      style="width:100%; text-align:left; padding:0.45rem 0.75rem; border-radius:6px; font-size:0.82rem; display:flex; align-items:center; gap:0.5rem; border:none; cursor:pointer; background:transparent; color:#8a7f78; font-family:'Special Elite',serif; transition:color 0.15s;">
       <span>🚪</span><span>Logout</span>
     </button>
   </div>

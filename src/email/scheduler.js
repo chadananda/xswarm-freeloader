@@ -42,7 +42,7 @@ export class EmailScheduler {
   async sendDigest() {
     try {
       const digest = await this.digestBuilder.buildDaily();
-      await this.mailer.send(this.config.email.to, digest.subject, digest.html);
+      await this.mailer.send(this.config.email.to, digest.subject, digest.html, digest.attachments);
     } catch (err) {
       this.logger?.error?.(`Failed to send digest: ${err.message}`);
     }

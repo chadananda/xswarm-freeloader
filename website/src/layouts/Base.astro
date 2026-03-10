@@ -67,6 +67,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://freeload
       background-size: 256px 256px;
       background-repeat: repeat;
       background-blend-mode: multiply;
+      overflow-x: hidden;
     }
 
     .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }

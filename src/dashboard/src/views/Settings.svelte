@@ -1,6 +1,9 @@
 <script>
+  // :arch: settings view — general config, email reports (Resend/SMTP), password change, about
+  // :why: DashboardCard wrapping for dark paper theme; Resend as simple email provider option
   import { onMount } from 'svelte'
   import { api } from '../lib/api.js'
+  import DashboardCard from '../components/DashboardCard.svelte'
 
   let settings = $state(null)
   let error = $state('')
@@ -9,9 +12,30 @@
   let pwForm = $state({ current: '', next: '', confirm: '' })
   let pwError = $state('')
   let pwSaved = $state(false)
+  let configVersions = $state([])
+  // Email report state
+  let emailProvider = $state('none')
+  let emailApiKey = $state('')
+  let emailRecipient = $state('')
+  let emailFrequency = $state('daily')
+  let emailSmtp = $state({ host: '', port: 587, user: '', pass: '' })
+  let emailSaving = $state(false)
+  let emailSaved = $state('')
+  let emailError = $state('')
+  let testSending = $state(false)
+  let testResult = $state('')
 
   onMount(async () => {
-    try { settings = await api.settings() }
+    try {
+      settings = await api.settings()
+      // Load email settings from config
+      const email = settings?.config?.email || {}
+      emailProvider = email.provider || 'none'
+      emailApiKey = email.apiKey || ''
+      emailRecipient = email.to || ''
+      emailFrequency = email.digestFrequency || 'daily'
+      if (email.smtp) emailSmtp = { host: email.smtp.host || '', port: email.smtp.port || 587, user: email.smtp.user || '', pass: email.smtp.pass || '' }
+    }
     catch (err) { error = err.message }
   })
 
@@ -26,6 +50,43 @@
       error = err.message
     } finally {
       saving = false
+    }
+  }
+
+  async function saveEmailSettings(e) {
+    e.preventDefault()
+    emailSaving = true
+    emailError = ''
+    try {
+      const emailConfig = {
+        enabled: emailProvider !== 'none',
+        provider: emailProvider,
+        apiKey: emailProvider === 'resend' ? emailApiKey : undefined,
+        smtp: emailProvider === 'smtp' ? emailSmtp : undefined,
+        to: emailRecipient,
+        digestFrequency: emailFrequency
+      }
+      await api.updateConfig({ email: emailConfig })
+      emailSaved = 'email settings saved!'
+      setTimeout(() => { emailSaved = '' }, 2000)
+    } catch (err) {
+      emailError = err.message
+    } finally {
+      emailSaving = false
+    }
+  }
+
+  async function sendTestReport() {
+    testSending = true
+    testResult = ''
+    try {
+      const result = await api.sendTestReport()
+      testResult = result.emailed ? `Test report sent to ${result.emailed}` : 'Report generated (no email configured)'
+      setTimeout(() => { testResult = '' }, 4000)
+    } catch (err) {
+      testResult = `Failed: ${err.message}`
+    } finally {
+      testSending = false
     }
   }
 
@@ -49,86 +110,206 @@
     { value: 'daily', label: 'daily' },
     { value: 'weekly', label: 'weekly' }
   ]
+
+  const inputStyle = "background:#2e2a27; border:1px solid #3a3530; border-radius:6px; padding:0.45rem 0.75rem; font-size:0.85rem; color:#c8bdb6; outline:none; width:100%; box-sizing:border-box;"
+
+  async function loadVersions() {
+    try { configVersions = await api.getConfigVersions(10) }
+    catch (err) { error = err.message }
+  }
+
+  async function rollbackVersion(versionNumber) {
+    if (!confirm(`Rollback to config version ${versionNumber}?`)) return
+    try {
+      await api.rollbackConfig(versionNumber)
+      saved = 'rolled back!'
+      setTimeout(() => { saved = '' }, 2000)
+    } catch (err) { error = err.message }
+  }
 </script>
 
-<div>
-  <div class="mb-6">
-    <h1 class="text-xl font-bold text-white">Settings</h1>
-    <p class="text-gray-400 text-sm">tune the machine</p>
+<div class="space-y-5">
+  <div>
+    <h1 class="text-lg font-bold" style="font-family:'Permanent Marker',cursive; color:#27864a;">Settings</h1>
+    <p style="color:#8a7f78; font-size:0.78rem;">tune the machine</p>
   </div>
   {#if error}
-    <div class="text-red-400 text-sm bg-red-900/30 border border-red-800 rounded-lg p-3 mb-4">{error}</div>
+    <div style="color:#c0392b; font-size:0.75rem; background:rgba(192,57,43,0.1); border:1px solid rgba(192,57,43,0.3); border-radius:6px; padding:0.4rem 0.75rem;">{error}</div>
   {/if}
   {#if settings}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <form onsubmit={saveSettings} class="bg-gray-800 rounded-xl border border-gray-700 p-5">
-        <h2 class="text-sm font-semibold text-gray-300 mb-4">general</h2>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs text-gray-400 mb-1">Router port</label>
-            <input type="number" bind:value={settings.port} class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
-          </div>
-          <div>
-            <label class="block text-xs text-gray-400 mb-1">Email (for digests)</label>
-            <input type="email" bind:value={settings.email} placeholder="you@example.com" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500" />
-          </div>
-          <div>
-            <label class="block text-xs text-gray-400 mb-1">Digest frequency</label>
-            <select bind:value={settings.digest_frequency} class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
-              {#each digestOptions as opt}<option value={opt.value}>{opt.label}</option>{/each}
-            </select>
-          </div>
-          <div class="flex items-center gap-3">
-            <input type="checkbox" id="update_check" bind:checked={settings.update_check} class="rounded border-gray-600 bg-gray-700 text-green-500 focus:ring-green-500" />
-            <label for="update_check" class="text-sm text-gray-300">check for updates automatically</label>
-          </div>
-        </div>
-        {#if saved}
-          <div class="mt-4 text-sm text-green-400">{saved}</div>
-        {/if}
-        <button type="submit" disabled={saving} class="mt-4 bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-          {saving ? 'saving...' : 'save settings'}
-        </button>
-      </form>
-      <div class="space-y-6">
-        <form onsubmit={changePassword} class="bg-gray-800 rounded-xl border border-gray-700 p-5">
-          <h2 class="text-sm font-semibold text-gray-300 mb-4">change password</h2>
-          <div class="space-y-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div class="space-y-5">
+        <DashboardCard title="General" accent="green">
+          <form onsubmit={saveSettings} style="display:flex; flex-direction:column; gap:1rem;">
             <div>
-              <label class="block text-xs text-gray-400 mb-1">Current password</label>
-              <input type="password" bind:value={pwForm.current} autocomplete="current-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+              <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Router port</label>
+              <input type="number" bind:value={settings.port} style={inputStyle} />
             </div>
             <div>
-              <label class="block text-xs text-gray-400 mb-1">New password</label>
-              <input type="password" bind:value={pwForm.next} autocomplete="new-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+              <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Email (for digests)</label>
+              <input type="email" bind:value={settings.email} placeholder="you@example.com" style={inputStyle} />
             </div>
             <div>
-              <label class="block text-xs text-gray-400 mb-1">Confirm new password</label>
-              <input type="password" bind:value={pwForm.confirm} autocomplete="new-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+              <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Digest frequency</label>
+              <select bind:value={settings.digest_frequency} style={inputStyle}>
+                {#each digestOptions as opt}<option value={opt.value}>{opt.label}</option>{/each}
+              </select>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <input type="checkbox" id="update_check" bind:checked={settings.update_check}
+                style="accent-color:#27864a; width:1rem; height:1rem;" />
+              <label for="update_check" style="font-size:0.85rem; color:#c8bdb6;">check for updates automatically</label>
+            </div>
+            {#if saved}
+              <div style="font-size:0.78rem; color:#27864a;">{saved}</div>
+            {/if}
+            <button type="submit" disabled={saving}
+              style="background:#27864a; color:#fff; font-size:0.8rem; font-weight:600; padding:0.4rem 1rem; border-radius:6px; border:none; cursor:pointer; opacity:{saving ? 0.6 : 1}; align-self:flex-start;">
+              {saving ? 'saving...' : 'save settings'}
+            </button>
+          </form>
+        </DashboardCard>
+        <DashboardCard title="Email Reports" accent="blue">
+          <form onsubmit={saveEmailSettings} style="display:flex; flex-direction:column; gap:1rem;">
+            <div>
+              <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Email provider</label>
+              <select bind:value={emailProvider} style={inputStyle}>
+                <option value="none">Disabled</option>
+                <option value="resend">Resend (free — 100 emails/day)</option>
+                <option value="smtp">Custom SMTP</option>
+              </select>
+            </div>
+            {#if emailProvider === 'resend'}
+              <div>
+                <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Resend API key</label>
+                <input type="password" bind:value={emailApiKey} placeholder="re_..." style={inputStyle} />
+                <div style="font-size:0.68rem; color:#8a7f78; margin-top:0.3rem;">
+                  Get a free key at <a href="https://resend.com" target="_blank" style="color:#4a6fa8;">resend.com</a> (100 emails/day free)
+                </div>
+              </div>
+            {/if}
+            {#if emailProvider === 'smtp'}
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">SMTP host</label>
+                  <input type="text" bind:value={emailSmtp.host} placeholder="smtp.example.com" style={inputStyle} />
+                </div>
+                <div>
+                  <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Port</label>
+                  <input type="number" bind:value={emailSmtp.port} style={inputStyle} />
+                </div>
+                <div>
+                  <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Username</label>
+                  <input type="text" bind:value={emailSmtp.user} style={inputStyle} />
+                </div>
+                <div>
+                  <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Password</label>
+                  <input type="password" bind:value={emailSmtp.pass} style={inputStyle} />
+                </div>
+              </div>
+            {/if}
+            {#if emailProvider !== 'none'}
+              <div>
+                <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Recipient email</label>
+                <input type="email" bind:value={emailRecipient} placeholder="you@example.com" style={inputStyle} />
+              </div>
+              <div>
+                <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Report frequency</label>
+                <select bind:value={emailFrequency} style={inputStyle}>
+                  {#each digestOptions as opt}<option value={opt.value}>{opt.label}</option>{/each}
+                </select>
+              </div>
+            {/if}
+            {#if emailError}
+              <div style="font-size:0.78rem; color:#c0392b;">{emailError}</div>
+            {/if}
+            {#if emailSaved}
+              <div style="font-size:0.78rem; color:#27864a;">{emailSaved}</div>
+            {/if}
+            <div style="display:flex; gap:0.75rem; align-items:center;">
+              <button type="submit" disabled={emailSaving}
+                style="background:#4a6fa8; color:#fff; font-size:0.8rem; font-weight:600; padding:0.4rem 1rem; border-radius:6px; border:none; cursor:pointer; opacity:{emailSaving ? 0.6 : 1};">
+                {emailSaving ? 'saving...' : 'save email settings'}
+              </button>
+              {#if emailProvider !== 'none'}
+                <button type="button" onclick={sendTestReport} disabled={testSending}
+                  style="background:#2e2a27; color:#c8bdb6; font-size:0.8rem; padding:0.4rem 1rem; border-radius:6px; border:1px solid #3a3530; cursor:pointer; opacity:{testSending ? 0.6 : 1};">
+                  {testSending ? 'sending...' : 'send test report'}
+                </button>
+              {/if}
+            </div>
+            {#if testResult}
+              <div style="font-size:0.78rem; color:{testResult.startsWith('Failed') ? '#c0392b' : '#27864a'};">{testResult}</div>
+            {/if}
+          </form>
+        </DashboardCard>
+      </div>
+      <div class="space-y-5">
+        <DashboardCard title="Change password" accent="blue">
+          <form onsubmit={changePassword} style="display:flex; flex-direction:column; gap:1rem;">
+            <div>
+              <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Current password</label>
+              <input type="password" bind:value={pwForm.current} autocomplete="current-password" style={inputStyle} />
+            </div>
+            <div>
+              <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">New password</label>
+              <input type="password" bind:value={pwForm.next} autocomplete="new-password" style={inputStyle} />
+            </div>
+            <div>
+              <label style="display:block; font-size:0.72rem; color:#8a7f78; margin-bottom:0.3rem;">Confirm new password</label>
+              <input type="password" bind:value={pwForm.confirm} autocomplete="new-password" style={inputStyle} />
+            </div>
+            {#if pwError}
+              <div style="font-size:0.78rem; color:#c0392b;">{pwError}</div>
+            {/if}
+            {#if pwSaved}
+              <div style="font-size:0.78rem; color:#27864a;">password changed — try not to forget it this time</div>
+            {/if}
+            <button type="submit"
+              style="background:#4a6fa8; color:#fff; font-size:0.8rem; font-weight:600; padding:0.4rem 1rem; border-radius:6px; border:none; cursor:pointer; align-self:flex-start;">
+              change password
+            </button>
+          </form>
+        </DashboardCard>
+        <DashboardCard title="About" accent="orange">
+          <p style="font-size:0.85rem; color:#c8bdb6; margin:0 0 0.25rem;">xswarm-freeloader v2.0</p>
+          <p style="font-size:0.78rem; color:#8a7f78; margin:0 0 0.75rem;">your AI provider's worst nightmare</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div style="background:#2e2a27; border-radius:6px; padding:0.5rem 0.75rem;">
+              <div style="font-size:0.65rem; color:#8a7f78;">router port</div>
+              <div style="font-family:monospace; color:#c8bdb6; font-size:0.85rem;">4011</div>
+            </div>
+            <div style="background:#2e2a27; border-radius:6px; padding:0.5rem 0.75rem;">
+              <div style="font-size:0.65rem; color:#8a7f78;">dashboard port</div>
+              <div style="font-family:monospace; color:#c8bdb6; font-size:0.85rem;">4010</div>
             </div>
           </div>
-          {#if pwError}
-            <div class="mt-3 text-sm text-red-400">{pwError}</div>
-          {/if}
-          {#if pwSaved}
-            <div class="mt-3 text-sm text-green-400">password changed — try not to forget it this time</div>
-          {/if}
-          <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-            change password
-          </button>
-        </form>
-        <div class="bg-gray-800 rounded-xl border border-gray-700 p-5">
-          <h2 class="text-sm font-semibold text-gray-300 mb-3">about</h2>
-          <p class="text-sm text-gray-400">xswarm-freeloader v2.0</p>
-          <p class="text-sm text-gray-500 mt-1">your AI provider's worst nightmare</p>
-          <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
-            <div class="bg-gray-700/50 rounded-lg p-2"><span class="text-gray-400">router port</span><div class="text-white font-mono">4011</div></div>
-            <div class="bg-gray-700/50 rounded-lg p-2"><span class="text-gray-400">dashboard port</span><div class="text-white font-mono">4010</div></div>
+        </DashboardCard>
+        <DashboardCard title="Config Versions" accent="green">
+          <div style="font-size:0.78rem; color:#8a7f78;">
+            <button onclick={loadVersions}
+              style="background:#2e2a27; color:#c8bdb6; font-size:0.75rem; padding:0.3rem 0.75rem; border-radius:6px; border:1px solid #3a3530; cursor:pointer; margin-bottom:0.75rem;">
+              load version history
+            </button>
+            {#each configVersions as v}
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0; border-bottom:1px solid rgba(58,53,48,0.5);">
+                <div>
+                  <span style="color:#c8bdb6;">v{v.version_number}</span>
+                  <span style="margin-left:0.5rem; font-size:0.65rem;">{v.change_description || 'no description'}</span>
+                </div>
+                <button onclick={() => rollbackVersion(v.version_number)}
+                  style="font-size:0.65rem; background:none; border:none; cursor:pointer; color:#d4831a;">
+                  rollback
+                </button>
+              </div>
+            {:else}
+              <div style="color:#8a7f78; font-size:0.78rem;">click to load versions</div>
+            {/each}
           </div>
-        </div>
+        </DashboardCard>
       </div>
     </div>
   {:else if !error}
-    <div class="text-gray-400 text-sm">loading settings...</div>
+    <div style="color:#8a7f78; font-size:0.85rem;">loading settings...</div>
   {/if}
 </div>

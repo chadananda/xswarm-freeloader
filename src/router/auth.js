@@ -1,29 +1,49 @@
+// :arch: auth middleware — hash-based API key lookup with network restriction for non-localhost
+// :deps: jsonwebtoken, hashApiKey, appKeyRepo | consumed by app.js via Fastify onRequest hook
+// :rules: non-loopback without key → 401; local without key → anonymous (null app); hash lookup first, plaintext fallback
 import jwt from 'jsonwebtoken';
 import { AuthenticationError } from '../utils/errors.js';
-
+import { hashApiKey } from '../utils/crypto.js';
+//
 const JWT_SECRET = process.env.XSWARM_JWT_SECRET || 'xswarm-dev-secret-change-in-production';
-
-export function authenticateApiKey(appRepo) {
+const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1', 'localhost']);
+//
+function isLoopback(request) {
+  const ip = request.ip || request.socket?.remoteAddress || '';
+  return LOOPBACK.has(ip);
+}
+//
+export function authenticateApiKey(appRepo, appKeyRepo) {
   return async (request, reply) => {
-    // Skip auth for health check and dashboard login
     if (request.url === '/v1/health' || request.url === '/api/auth/login') return;
-
-    // Dashboard routes use JWT
-    if (request.url.startsWith('/api/')) {
-      return authenticateJwt(request, reply);
-    }
-
-    // API routes use x-api-key
+    if (request.url.startsWith('/api/')) return authenticateJwt(request, reply);
+    //
     const apiKey = request.headers['x-api-key'] || request.headers['authorization']?.replace('Bearer ', '');
+    const local = isLoopback(request);
+    //
     if (!apiKey) {
+      if (local) { request.app = null; return; } // Anonymous local access
       throw new AuthenticationError('Missing API key. Use x-api-key header or Bearer token.');
     }
-
-    const app = appRepo.getByApiKey(apiKey);
-    if (!app) {
-      throw new AuthenticationError('Invalid API key');
+    //
+    // Hash-based lookup first (app_keys table)
+    if (appKeyRepo) {
+      const keyHash = hashApiKey(apiKey);
+      const keyRecord = appKeyRepo.getByHash(keyHash);
+      if (keyRecord) {
+        const app = appRepo.get(keyRecord.app_id);
+        if (app) {
+          request.app = app;
+          request.appKey = keyRecord;
+          appKeyRepo.touchLastUsed(keyRecord.id);
+          return;
+        }
+      }
     }
-
+    //
+    // Fallback: plaintext lookup (backward compat during migration)
+    const app = appRepo.getByApiKey(apiKey);
+    if (!app) throw new AuthenticationError('Invalid API key');
     request.app = app;
   };
 }

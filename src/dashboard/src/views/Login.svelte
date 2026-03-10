@@ -2,6 +2,7 @@
   import { api } from '../lib/api.js'
   import { setToken } from '../lib/stores.js'
   import { navigate } from '../lib/router.js'
+  import DashboardCard from '../components/DashboardCard.svelte'
 
   let password = $state('')
   let error = $state('')
@@ -23,36 +24,38 @@
   }
 </script>
 
-<div class="min-h-screen bg-gray-900 flex items-center justify-center">
-  <div class="w-full max-w-sm">
-    <div class="text-center mb-8">
-      <div class="text-5xl mb-3">🐝</div>
-      <h1 class="text-2xl font-bold text-white">xswarm freeloader</h1>
-      <p class="text-gray-400 text-sm mt-1">breaking into your own dashboard...</p>
+<div style="min-height:100vh; background:#1a1816; display:flex; align-items:center; justify-content:center;">
+  <div style="width:100%; max-width:22rem; padding:0 1rem;">
+    <div style="text-align:center; margin-bottom:2rem;">
+      <div style="font-size:3rem; margin-bottom:0.5rem;">🐝</div>
+      <h1 style="font-family:'Permanent Marker',cursive; font-size:1.4rem; color:#27864a; margin:0;">xswarm freeloader</h1>
+      <p style="color:#8a7f78; font-size:0.78rem; margin:0.4rem 0 0;">breaking into your own dashboard...</p>
     </div>
-    <form onsubmit={handleLogin} class="bg-gray-800 rounded-xl p-6 border border-gray-700 shadow-xl">
-      <div class="mb-4">
-        <label class="block text-sm text-gray-400 mb-2" for="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          bind:value={password}
-          placeholder="shhh, it's a secret"
-          autocomplete="current-password"
-          class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-        />
-      </div>
-      {#if error}
-        <div class="mb-4 text-sm text-red-400 bg-red-900/30 border border-red-800 rounded-lg px-3 py-2">{error}</div>
-      {/if}
-      <button
-        type="submit"
-        disabled={loading}
-        class="w-full bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg transition-colors"
-      >
-        {loading ? 'sneaking in...' : 'break in'}
-      </button>
-    </form>
-    <p class="text-center text-xs text-gray-600 mt-4">your free tiers are waiting</p>
+    <DashboardCard accent="green">
+      <form onsubmit={handleLogin} style="display:flex; flex-direction:column; gap:1rem;">
+        <div>
+          <label style="display:block; font-size:0.75rem; color:#8a7f78; margin-bottom:0.4rem;" for="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            bind:value={password}
+            placeholder="shhh, it's a secret"
+            autocomplete="current-password"
+            style="width:100%; background:#2e2a27; border:1px solid #3a3530; border-radius:6px; padding:0.6rem 0.75rem; color:#c8bdb6; font-size:0.85rem; outline:none; box-sizing:border-box;"
+          />
+        </div>
+        {#if error}
+          <div style="font-size:0.78rem; color:#c0392b; background:rgba(192,57,43,0.1); border:1px solid rgba(192,57,43,0.3); border-radius:6px; padding:0.4rem 0.75rem;">{error}</div>
+        {/if}
+        <button
+          type="submit"
+          disabled={loading}
+          style="background:#27864a; color:#fff; font-family:'Permanent Marker',cursive; font-size:0.9rem; padding:0.65rem; border-radius:6px; border:none; cursor:pointer; opacity:{loading ? 0.6 : 1}; transition:opacity 0.2s;"
+        >
+          {loading ? 'sneaking in...' : 'break in'}
+        </button>
+      </form>
+    </DashboardCard>
+    <p style="text-align:center; font-size:0.7rem; color:#5a5248; margin-top:1rem;">your free tiers are waiting</p>
   </div>
 </div>

@@ -2,7 +2,8 @@ import Database from 'better-sqlite3';
 import { runMigrations } from '../../src/db/migrator.js';
 import {
   ProviderRepository, ModelRepository, AccountRepository,
-  AppRepository, UsageRepository, BudgetRepository
+  AppRepository, AppKeyRepository, AppPolicyRepository,
+  UsageRepository, BudgetRepository, SanitizationRepository
 } from '../../src/db/repositories/index.js';
 
 export function createTestDb() {
@@ -16,8 +17,11 @@ export function createTestDb() {
     models: new ModelRepository(db),
     accounts: new AccountRepository(db),
     apps: new AppRepository(db),
+    appKeys: new AppKeyRepository(db),
+    appPolicies: new AppPolicyRepository(db),
     usage: new UsageRepository(db),
     budgets: new BudgetRepository(db),
+    sanitization: new SanitizationRepository(db),
     close: () => db.close()
   };
 }

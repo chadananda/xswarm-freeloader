@@ -33,7 +33,10 @@ describe('Router App', () => {
       models: testDb.models,
       accounts: testDb.accounts,
       apps: testDb.apps,
+      appKeys: testDb.appKeys,
+      appPolicies: testDb.appPolicies,
       usage: testDb.usage,
+      sanitizationRepo: testDb.sanitization,
       registry,
       healthMonitor,
       budgetTracker,
@@ -64,9 +67,9 @@ describe('Router App', () => {
     expect(body.data.length).toBeGreaterThan(0);
   });
 
-  it('should reject requests without API key', async () => {
+  it('should allow anonymous local requests without API key', async () => {
     const res = await app.inject({ method: 'GET', url: '/v1/models' });
-    expect(res.statusCode).toBe(401);
+    expect(res.statusCode).toBe(200); // Anonymous local access returns models
   });
 
   it('should reject requests with invalid API key', async () => {

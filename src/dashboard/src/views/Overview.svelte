@@ -1,16 +1,31 @@
 <script>
+  // :arch: overview dashboard — primary status screen with savings, charts, provider health
+  // :why: replaces raw gray-800 divs with DashboardCard dark paper theme; uses task-1 APIs
+  // :deps: api.overview, api.usageTimeseries, api.usageByProvider → DashboardCard, AreaChart, DonutChart, SavingsComparison
   import { onMount, onDestroy } from 'svelte'
   import { api } from '../lib/api.js'
-  import StatCard from '../components/StatCard.svelte'
+  import DashboardCard from '../components/DashboardCard.svelte'
+  import AreaChart from '../components/AreaChart.svelte'
+  import DonutChart from '../components/DonutChart.svelte'
+  import SavingsComparison from '../components/SavingsComparison.svelte'
   import HealthBadge from '../components/HealthBadge.svelte'
 
   let overview = $state(null)
+  let timeseries = $state([])
+  let byProvider = $state([])
   let error = $state('')
   let interval = null
 
   async function load() {
     try {
-      overview = await api.overview()
+      const [ov, ts, bp] = await Promise.all([
+        api.overview(),
+        api.usageTimeseries(30).catch(() => []),
+        api.usageByProvider().catch(() => [])
+      ])
+      overview = ov
+      timeseries = Array.isArray(ts) ? ts.map(d => ({ date: d.date, value: Number(d.total_cost || 0) })) : []
+      byProvider = Array.isArray(bp) ? bp : []
       error = ''
     } catch (err) {
       error = err.message
@@ -25,56 +40,149 @@
 
   const fmt = (n) => n == null ? '—' : `$${Number(n).toFixed(4)}`
   const fmtBig = (n) => n == null ? '—' : `$${Number(n).toFixed(2)}`
+
+  // Provider donut: color rotation
+  const providerColors = ['#27864a', '#4a6fa8', '#d4831a', '#8b5cf6', '#c0392b', '#0891b2', '#ca8a04']
+  const donutSegments = $derived(
+    byProvider.slice(0, 7).map((p, i) => ({
+      label: p.provider,
+      value: Number(p.total_requests || 0),
+      color: providerColors[i % providerColors.length]
+    }))
+  )
+
+  // Savings comparison data
+  const savingsActual = $derived(overview ? Number(overview.costMonth || 0) : 0)
+  const savingsOpenai = $derived(overview ? Number(overview.savedMonth || 0) + savingsActual : 0)
+  const savingsByProvider = $derived(
+    byProvider.slice(0, 5).map(p => ({
+      name: p.provider,
+      cost: Number(p.total_cost || 0),
+      openaiCost: Number(p.openai_equivalent || p.total_cost || 0) * 3
+    }))
+  )
+
+  // Budget progress: cost this month vs some cap (show 0–100% bar)
+  const budgetPct = $derived(() => {
+    if (!overview) return 0
+    const cap = 10 // default display cap $10
+    return Math.min(100, (Number(overview.costMonth || 0) / cap) * 100)
+  })
 </script>
 
-<div>
-  <div class="mb-6">
-    <h1 class="text-xl font-bold text-white">Overview</h1>
-    <p class="text-gray-400 text-sm">your free tiers at work — live stats every 5s</p>
+<div class="space-y-5">
+  <div class="flex items-baseline justify-between">
+    <div>
+      <h1 class="text-lg font-bold" style="font-family:'Permanent Marker',cursive; color:#27864a;">Overview</h1>
+      <p style="color:#8a7f78; font-size:0.78rem;">your free tiers at work — live stats every 5s</p>
+    </div>
+    {#if error}
+      <div style="color:#c0392b; font-size:0.75rem; background:rgba(192,57,43,0.1); border:1px solid rgba(192,57,43,0.3); border-radius:6px; padding:0.3rem 0.75rem;">{error}</div>
+    {/if}
   </div>
-  {#if error}
-    <div class="text-red-400 text-sm bg-red-900/30 border border-red-800 rounded-lg p-3 mb-4">{error}</div>
-  {/if}
+
   {#if overview}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <StatCard label="Cost today" value={fmtBig(overview.costToday)} accent="red" subtitle="actual spend" />
-      <StatCard label="Cost this month" value={fmtBig(overview.costMonth)} accent="red" subtitle="actual spend" />
-      <StatCard label="Saved today" value={fmtBig(overview.savedToday)} accent="green" subtitle="vs paid equivalent" />
-      <StatCard label="Saved this month" value={fmtBig(overview.savedMonth)} accent="green" subtitle="freeloading like a boss" />
+    <!-- Stat row -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <DashboardCard accent="orange" subtitle="actual spend">
+        <div style="font-family:'Special Elite',serif; font-size:0.65rem; color:#8a7f78; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem;">Cost today</div>
+        <div style="font-size:1.6rem; font-weight:800; color:#d4831a; line-height:1;">{fmtBig(overview.costToday)}</div>
+      </DashboardCard>
+      <DashboardCard accent="orange" subtitle="actual spend">
+        <div style="font-family:'Special Elite',serif; font-size:0.65rem; color:#8a7f78; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem;">Cost this month</div>
+        <div style="font-size:1.6rem; font-weight:800; color:#d4831a; line-height:1;">{fmtBig(overview.costMonth)}</div>
+      </DashboardCard>
+      <DashboardCard accent="green" subtitle="vs paid equivalent">
+        <div style="font-family:'Special Elite',serif; font-size:0.65rem; color:#8a7f78; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem;">Saved today</div>
+        <div style="font-size:1.6rem; font-weight:800; color:#27864a; line-height:1;">{fmtBig(overview.savedToday)}</div>
+      </DashboardCard>
+      <DashboardCard accent="green" subtitle="freeloading like a boss">
+        <div style="font-family:'Special Elite',serif; font-size:0.65rem; color:#8a7f78; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem;">Saved this month</div>
+        <div style="font-size:1.6rem; font-weight:800; color:#27864a; line-height:1;">{fmtBig(overview.savedMonth)}</div>
+      </DashboardCard>
     </div>
-    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-      <StatCard label="Requests today" value={overview.requestsToday ?? '—'} accent="blue" />
-      <StatCard label="Free tier hits" value={`${overview.freeTierPct ?? 0}%`} accent="green" subtitle="of all requests" />
-      <StatCard label="Avg latency" value={overview.avgLatencyMs ? `${overview.avgLatencyMs}ms` : '—'} accent="blue" />
+
+    <!-- Secondary stats -->
+    <div class="grid grid-cols-3 gap-4">
+      <DashboardCard accent="blue">
+        <div style="font-family:'Special Elite',serif; font-size:0.65rem; color:#8a7f78; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem;">Requests today</div>
+        <div style="font-size:1.4rem; font-weight:800; color:#4a6fa8; line-height:1;">{overview.requestsToday ?? '—'}</div>
+      </DashboardCard>
+      <DashboardCard accent="green">
+        <div style="font-family:'Special Elite',serif; font-size:0.65rem; color:#8a7f78; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem;">Free tier hits</div>
+        <div style="font-size:1.4rem; font-weight:800; color:#27864a; line-height:1;">{overview.freeTierPct ?? 0}%</div>
+        <div style="font-size:0.65rem; color:#8a7f78; margin-top:0.2rem;">of all requests</div>
+        <!-- Setup progress indicator -->
+        <div style="margin-top:0.5rem; background:#3a3530; border-radius:3px; height:4px; overflow:hidden;">
+          <div style="height:100%; background:#27864a; width:{overview.freeTierPct ?? 0}%; transition:width 0.8s ease;"></div>
+        </div>
+      </DashboardCard>
+      <DashboardCard accent="blue">
+        <div style="font-family:'Special Elite',serif; font-size:0.65rem; color:#8a7f78; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem;">Avg latency</div>
+        <div style="font-size:1.4rem; font-weight:800; color:#4a6fa8; line-height:1;">{overview.avgLatencyMs ? `${overview.avgLatencyMs}ms` : '—'}</div>
+      </DashboardCard>
     </div>
-    <div class="bg-gray-800 rounded-xl border border-gray-700 p-4 mb-6">
-      <h2 class="text-sm font-semibold text-gray-300 mb-3">Provider Health</h2>
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+
+    <!-- Charts row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <DashboardCard title="Daily cost trend" accent="orange">
+        {#if timeseries.length > 0}
+          <AreaChart data={timeseries} height={180} color="#d4831a" />
+        {:else}
+          <div style="color:#8a7f78; font-size:0.78rem; padding:2rem 0; text-align:center;">no timeseries data yet</div>
+        {/if}
+      </DashboardCard>
+      <DashboardCard title="Provider distribution" accent="blue">
+        {#if donutSegments.length > 0}
+          <DonutChart segments={donutSegments} size={160} />
+        {:else}
+          <div style="color:#8a7f78; font-size:0.78rem; padding:2rem 0; text-align:center;">make some requests first</div>
+        {/if}
+      </DashboardCard>
+    </div>
+
+    <!-- Savings comparison -->
+    {#if savingsOpenai > 0}
+      <DashboardCard title="Savings comparison" subtitle="you vs OpenAI equivalent" accent="green">
+        <SavingsComparison
+          actualCost={savingsActual}
+          openaiEquivalent={savingsOpenai}
+          byProvider={savingsByProvider}
+        />
+      </DashboardCard>
+    {/if}
+
+    <!-- Provider health -->
+    <DashboardCard title="Provider health" accent="green">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
         {#each (overview.providers || []) as p}
-          <div class="flex items-center justify-between bg-gray-700/50 rounded-lg px-3 py-2">
-            <span class="text-sm text-white truncate">{p.name}</span>
+          <div style="display:flex; align-items:center; justify-content:space-between; background:#2e2a27; border-radius:6px; padding:0.4rem 0.75rem;">
+            <span style="font-size:0.8rem; color:#c8bdb6; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{p.name}</span>
             <HealthBadge status={p.health} />
           </div>
+        {:else}
+          <div style="color:#8a7f78; font-size:0.78rem;">no providers configured</div>
         {/each}
       </div>
-    </div>
-    <div class="bg-gray-800 rounded-xl border border-gray-700 p-4">
-      <h2 class="text-sm font-semibold text-gray-300 mb-3">Live Request Feed</h2>
-      <div class="space-y-2 max-h-72 overflow-y-auto">
+    </DashboardCard>
+
+    <!-- Live request feed -->
+    <DashboardCard title="Live request feed" accent="blue">
+      <div style="max-height:14rem; overflow-y:auto;">
         {#each (overview.recentRequests || []) as req}
-          <div class="flex items-center gap-3 text-xs bg-gray-700/50 rounded-lg px-3 py-2">
-            <span class="text-gray-400 w-20 shrink-0">{new Date(req.timestamp).toLocaleTimeString()}</span>
-            <span class="text-blue-300 truncate flex-1">{req.provider}</span>
-            <span class="text-gray-300 truncate flex-1">{req.model}</span>
-            <span class="text-green-400 w-16 text-right">{fmt(req.cost)}</span>
-            <span class="text-gray-400 w-16 text-right">{req.latencyMs}ms</span>
+          <div style="display:flex; align-items:center; gap:0.75rem; font-size:0.72rem; background:#2e2a27; border-radius:6px; padding:0.35rem 0.75rem; margin-bottom:0.35rem;">
+            <span style="color:#8a7f78; width:5rem; flex-shrink:0;">{new Date(req.timestamp).toLocaleTimeString()}</span>
+            <span style="color:#4a6fa8; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{req.provider}</span>
+            <span style="color:#c8bdb6; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{req.model}</span>
+            <span style="color:#27864a; width:4.5rem; text-align:right;">{fmt(req.cost)}</span>
+            <span style="color:#8a7f78; width:4rem; text-align:right;">{req.latencyMs}ms</span>
           </div>
         {:else}
-          <div class="text-gray-500 text-sm text-center py-4">no requests yet — wake up those free tiers!</div>
+          <div style="color:#8a7f78; font-size:0.78rem; text-align:center; padding:1.5rem 0;">no requests yet — wake up those free tiers!</div>
         {/each}
       </div>
-    </div>
+    </DashboardCard>
   {:else if !error}
-    <div class="text-gray-400 text-sm">loading the goods...</div>
+    <div style="color:#8a7f78; font-size:0.85rem;">loading the goods...</div>
   {/if}
 </div>

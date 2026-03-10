@@ -1,20 +1,20 @@
 <script>
+  // :arch: accounts view — manage provider API keys with add/rotate/test/delete
+  // :why: DashboardCard theming; inline table replaces raw gray-800 divs
   import { onMount } from 'svelte'
   import { api } from '../lib/api.js'
+  import DashboardCard from '../components/DashboardCard.svelte'
 
   let accounts = $state([])
   let providers = $state([])
   let error = $state('')
   let success = $state('')
-  // Add form
   let newProviderId = $state('')
   let newApiKey = $state('')
   let adding = $state(false)
-  // Edit key modal
   let editAccount = $state(null)
   let editKey = $state('')
   let editing = $state(false)
-  // Test status per id
   let testing = $state({})
   let testResults = $state({})
 
@@ -57,10 +57,7 @@
     } catch (err) { error = err.message }
   }
 
-  function openEdit(account) {
-    editAccount = account
-    editKey = ''
-  }
+  function openEdit(account) { editAccount = account; editKey = '' }
 
   async function saveKey() {
     if (!editKey || !editAccount) return
@@ -89,160 +86,121 @@
     testing = { ...testing, [id]: false }
   }
 
-  const statusColor = (status) =>
-    status === 'active' ? 'text-green-400' :
-    status === 'invalid' ? 'text-red-400' :
-    'text-gray-400'
+  const statusStyle = (status) =>
+    status === 'active' ? 'background:rgba(39,134,74,0.2); color:#27864a;' :
+    status === 'invalid' ? 'background:rgba(192,57,43,0.2); color:#c0392b;' :
+    'background:rgba(58,53,48,0.5); color:#8a7f78;'
 
-  const statusBg = (status) =>
-    status === 'active' ? 'bg-green-900/50 text-green-400' :
-    status === 'invalid' ? 'bg-red-900/50 text-red-400' :
-    'bg-gray-700 text-gray-400'
+  const inputStyle = "background:#2e2a27; border:1px solid #3a3530; border-radius:6px; padding:0.35rem 0.75rem; font-size:0.8rem; color:#c8bdb6; outline:none;"
 </script>
 
-<div>
-  <div class="mb-6">
-    <h1 class="text-xl font-bold text-white">Accounts</h1>
-    <p class="text-gray-400 text-sm">manage API keys for each provider</p>
+<div class="space-y-5">
+  <div>
+    <h1 class="text-lg font-bold" style="font-family:'Permanent Marker',cursive; color:#27864a;">Accounts</h1>
+    <p style="color:#8a7f78; font-size:0.78rem;">manage API keys for each provider</p>
   </div>
   {#if error}
-    <div class="text-red-400 text-sm bg-red-900/30 border border-red-800 rounded-lg p-3 mb-4">{error}</div>
+    <div style="color:#c0392b; font-size:0.75rem; background:rgba(192,57,43,0.1); border:1px solid rgba(192,57,43,0.3); border-radius:6px; padding:0.4rem 0.75rem;">{error}</div>
   {/if}
   {#if success}
-    <div class="text-green-400 text-sm bg-green-900/30 border border-green-800 rounded-lg p-3 mb-4">{success}</div>
+    <div style="color:#27864a; font-size:0.75rem; background:rgba(39,134,74,0.1); border:1px solid rgba(39,134,74,0.3); border-radius:6px; padding:0.4rem 0.75rem;">{success}</div>
   {/if}
-  <!-- Add account form -->
-  <div class="bg-gray-800 rounded-xl border border-gray-700 p-4 mb-6">
-    <h2 class="text-sm font-semibold text-gray-300 mb-3">Add Provider Account</h2>
-    <div class="flex flex-wrap gap-3">
-      <select
-        bind:value={newProviderId}
-        class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500 min-w-40"
-      >
+  <!-- Add account -->
+  <DashboardCard title="Add provider account" accent="green">
+    <div style="display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center;">
+      <select bind:value={newProviderId} style="{inputStyle} min-width:10rem;">
         <option value="">select provider...</option>
-        {#each availableProviders as p}
-          <option value={p.id}>{p.name}</option>
-        {/each}
+        {#each availableProviders as p}<option value={p.id}>{p.name}</option>{/each}
         {#each providers.filter(p => usedProviderIds.has(p.id)) as p}
           <option value={p.id}>{p.name} (add another key)</option>
         {/each}
       </select>
-      <input
-        type="password"
-        bind:value={newApiKey}
-        placeholder="API key..."
-        class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 flex-1 min-w-48"
-      />
-      <button
-        onclick={addAccount}
-        disabled={adding || !newProviderId || !newApiKey}
-        class="px-4 py-1.5 bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors font-medium"
-      >
+      <input type="password" bind:value={newApiKey} placeholder="API key..." style="{inputStyle} flex:1; min-width:12rem;" />
+      <button onclick={addAccount} disabled={adding || !newProviderId || !newApiKey}
+        style="background:#27864a; color:#fff; font-size:0.8rem; padding:0.35rem 0.9rem; border-radius:6px; border:none; cursor:pointer; opacity:{adding || !newProviderId || !newApiKey ? 0.5 : 1};">
         {adding ? 'adding...' : 'Add Account'}
       </button>
     </div>
-  </div>
+  </DashboardCard>
   <!-- Accounts table -->
-  <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
-    <table class="w-full text-sm">
-      <thead>
-        <tr class="border-b border-gray-700 text-gray-400 text-xs uppercase">
-          <th class="text-left px-4 py-3">Provider</th>
-          <th class="text-left px-4 py-3">Status</th>
-          <th class="text-left px-4 py-3">Added</th>
-          <th class="text-left px-4 py-3">Test Result</th>
-          <th class="text-right px-4 py-3">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each accounts as acc}
-          <tr class="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors">
-            <td class="px-4 py-3 font-medium text-white">
-              {acc.provider?.name || acc.provider_id}
-            </td>
-            <td class="px-4 py-3">
-              <span class="px-2 py-0.5 rounded-full text-xs {statusBg(acc.status)}">
-                {acc.status || 'unknown'}
-              </span>
-            </td>
-            <td class="px-4 py-3 text-gray-400 text-xs">
-              {acc.created_at ? new Date(acc.created_at * 1000).toLocaleDateString() : '—'}
-            </td>
-            <td class="px-4 py-3 text-xs">
-              {#if testing[acc.id]}
-                <span class="text-gray-400">testing...</span>
-              {:else if testResults[acc.id] != null}
-                {#if testResults[acc.id].ok}
-                  <span class="text-green-400">active</span>
+  <DashboardCard title="Provider accounts" accent="green">
+    <div style="overflow-x:auto;">
+      <table style="width:100%; font-size:0.78rem; border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1px solid #3a3530;">
+            <th style="text-align:left; padding:0.5rem 0.75rem; color:#8a7f78; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.06em;">Provider</th>
+            <th style="text-align:left; padding:0.5rem 0.75rem; color:#8a7f78; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.06em;">Status</th>
+            <th style="text-align:left; padding:0.5rem 0.75rem; color:#8a7f78; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.06em;">Added</th>
+            <th style="text-align:left; padding:0.5rem 0.75rem; color:#8a7f78; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.06em;">Test Result</th>
+            <th style="text-align:right; padding:0.5rem 0.75rem; color:#8a7f78; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.06em;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each accounts as acc}
+            <tr style="border-bottom:1px solid rgba(58,53,48,0.5);">
+              <td style="padding:0.5rem 0.75rem; color:#c8bdb6; font-weight:600;">{acc.provider?.name || acc.provider_id}</td>
+              <td style="padding:0.5rem 0.75rem;">
+                <span style="padding:0.15rem 0.5rem; border-radius:10px; font-size:0.65rem; {statusStyle(acc.status)}">{acc.status || 'unknown'}</span>
+              </td>
+              <td style="padding:0.5rem 0.75rem; color:#8a7f78; font-size:0.7rem;">
+                {acc.created_at ? new Date(acc.created_at * 1000).toLocaleDateString() : '—'}
+              </td>
+              <td style="padding:0.5rem 0.75rem; font-size:0.7rem;">
+                {#if testing[acc.id]}
+                  <span style="color:#8a7f78;">testing...</span>
+                {:else if testResults[acc.id] != null}
+                  {#if testResults[acc.id].ok}
+                    <span style="color:#27864a;">active</span>
+                  {:else}
+                    <span style="color:#c0392b;">{testResults[acc.id].error || 'invalid'}</span>
+                  {/if}
                 {:else}
-                  <span class="text-red-400">{testResults[acc.id].error || 'invalid'}</span>
+                  <span style="color:#5a5248;">—</span>
                 {/if}
-              {:else}
-                <span class="text-gray-600">—</span>
-              {/if}
-            </td>
-            <td class="px-4 py-3 text-right">
-              <div class="flex items-center justify-end gap-2">
-                <button
-                  onclick={() => testAccount(acc.id)}
-                  disabled={testing[acc.id]}
-                  class="px-2.5 py-1 bg-blue-900/50 hover:bg-blue-800/50 text-blue-400 text-xs rounded-lg transition-colors disabled:opacity-50"
-                >
-                  {testing[acc.id] ? '...' : 'test'}
-                </button>
-                <button
-                  onclick={() => openEdit(acc)}
-                  class="px-2.5 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded-lg transition-colors"
-                >
-                  rotate key
-                </button>
-                <button
-                  onclick={() => deleteAccount(acc.id)}
-                  class="px-2.5 py-1 bg-red-900/50 hover:bg-red-800/50 text-red-400 text-xs rounded-lg transition-colors"
-                >
-                  remove
-                </button>
-              </div>
-            </td>
-          </tr>
-        {:else}
-          <tr>
-            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
-              no accounts yet — add your first provider API key above
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  </div>
+              </td>
+              <td style="padding:0.5rem 0.75rem; text-align:right;">
+                <div style="display:flex; align-items:center; justify-content:flex-end; gap:0.4rem;">
+                  <button onclick={() => testAccount(acc.id)} disabled={testing[acc.id]}
+                    style="padding:0.2rem 0.6rem; background:rgba(74,111,168,0.2); color:#4a6fa8; font-size:0.7rem; border-radius:5px; border:none; cursor:pointer; opacity:{testing[acc.id] ? 0.5 : 1};">
+                    {testing[acc.id] ? '...' : 'test'}
+                  </button>
+                  <button onclick={() => openEdit(acc)}
+                    style="padding:0.2rem 0.6rem; background:#2e2a27; color:#c8bdb6; font-size:0.7rem; border-radius:5px; border:none; cursor:pointer;">
+                    rotate key
+                  </button>
+                  <button onclick={() => deleteAccount(acc.id)}
+                    style="padding:0.2rem 0.6rem; background:rgba(192,57,43,0.2); color:#c0392b; font-size:0.7rem; border-radius:5px; border:none; cursor:pointer;">
+                    remove
+                  </button>
+                </div>
+              </td>
+            </tr>
+          {:else}
+            <tr><td colspan="5" style="padding:2rem; text-align:center; color:#8a7f78;">no accounts yet — add your first provider API key above</td></tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
+  </DashboardCard>
 </div>
 
 <!-- Edit key modal -->
 {#if editAccount}
-  <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onclick={() => { editAccount = null }}>
-    <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-md mx-4" onclick={(e) => e.stopPropagation()}>
-      <h2 class="text-white font-semibold mb-1">Rotate API Key</h2>
-      <p class="text-gray-400 text-sm mb-4">
-        Update the API key for <span class="text-white">{editAccount.provider?.name || editAccount.provider_id}</span>
+  <div style="position:fixed; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:50;" onclick={() => { editAccount = null }}>
+    <div style="background:#252220; border:1px solid #3a3530; border-radius:12px; padding:1.5rem; width:100%; max-width:26rem; margin:0 1rem;" onclick={(e) => e.stopPropagation()}>
+      <h2 style="font-family:'Permanent Marker',cursive; color:#27864a; margin:0 0 0.3rem;">Rotate API Key</h2>
+      <p style="color:#8a7f78; font-size:0.78rem; margin:0 0 1rem;">
+        Update the API key for <span style="color:#c8bdb6;">{editAccount.provider?.name || editAccount.provider_id}</span>
       </p>
-      <input
-        type="password"
-        bind:value={editKey}
-        placeholder="new API key..."
-        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 mb-4"
-      />
-      <div class="flex justify-end gap-3">
-        <button
-          onclick={() => { editAccount = null }}
-          class="px-4 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm rounded-lg transition-colors"
-        >
+      <input type="password" bind:value={editKey} placeholder="new API key..."
+        style="width:100%; background:#2e2a27; border:1px solid #3a3530; border-radius:6px; padding:0.5rem 0.75rem; font-size:0.85rem; color:#c8bdb6; outline:none; box-sizing:border-box; margin-bottom:1rem;" />
+      <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+        <button onclick={() => { editAccount = null }}
+          style="padding:0.4rem 1rem; background:#2e2a27; color:#c8bdb6; font-size:0.8rem; border-radius:6px; border:none; cursor:pointer;">
           cancel
         </button>
-        <button
-          onclick={saveKey}
-          disabled={editing || !editKey}
-          class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors font-medium"
-        >
+        <button onclick={saveKey} disabled={editing || !editKey}
+          style="padding:0.4rem 1rem; background:#4a6fa8; color:#fff; font-size:0.8rem; border-radius:6px; border:none; cursor:pointer; opacity:{editing || !editKey ? 0.5 : 1};">
           {editing ? 'saving...' : 'save key'}
         </button>
       </div>

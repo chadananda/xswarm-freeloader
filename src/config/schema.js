@@ -37,6 +37,8 @@ export const ServerConfigSchema = z.object({
 
 export const EmailConfigSchema = z.object({
   enabled: z.boolean().default(false),
+  provider: z.enum(['resend', 'smtp', 'none']).default('none'),
+  apiKey: z.string().optional(),
   smtp: z.object({
     host: z.string(),
     port: z.number().default(587),
@@ -44,10 +46,24 @@ export const EmailConfigSchema = z.object({
     user: z.string(),
     pass: z.string()
   }).optional(),
+  sendmailPath: z.string().optional(),
+  from: z.string().optional(),
   digestFrequency: z.enum(['daily', 'weekly', 'never']).default('daily'),
   to: z.string().default('')
 });
 
+export const SanitizationDefaultsSchema = z.object({
+  defaultProfile: z.enum(['off', 'standard', 'aggressive']).default('off'),
+  blockOnSecrets: z.boolean().default(true),
+  redactPii: z.boolean().default(false)
+});
+//
+export const SecuritySchema = z.object({
+  requireKeyForExternal: z.boolean().default(true),
+  maxKeysPerApp: z.number().min(1).max(100).default(10),
+  allowAnonymousLocal: z.boolean().default(true)
+});
+//
 export const ConfigSchema = z.object({
   version: z.string().default('2.0'),
   routing: RoutingConfigSchema,
@@ -60,7 +76,9 @@ export const ConfigSchema = z.object({
     level: z.enum(['trace', 'debug', 'info', 'warn', 'error']).default('info')
   }).optional(),
   email: EmailConfigSchema.optional(),
-  catalogUrl: z.string().optional()
+  catalogUrl: z.string().optional(),
+  sanitization: SanitizationDefaultsSchema.optional(),
+  security: SecuritySchema.optional()
 });
 
 export function validateConfig(config) {

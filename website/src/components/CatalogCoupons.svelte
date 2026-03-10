@@ -233,6 +233,11 @@
     .coupon-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
     .coupon { transform: rotate(0deg) !important; }
     .tier-title { font-size: 1.4rem; }
+    .specs span { font-size: 0.66rem; }
+    .deal-after { font-size: 0.68rem; }
+    .lim { font-size: 0.7rem; }
+    .deal-unit { font-size: 0.7rem; }
+    .brand-name { font-size: 0.78rem; }
   }
   @media (max-width: 440px) { .coupon-grid { grid-template-columns: 1fr; } }
 </style>
