@@ -4,7 +4,8 @@ tests/
 *.spec.js
 coverage/
 
-# Documentation (not needed in package)
+# Documentation
+docs/
 IMPLEMENTATION_SUMMARY.md
 PRD.md
 
@@ -24,6 +25,26 @@ tmp/
 # Claude context
 .claude/
 
+# Environment files
+.env
+.env.*
+
 # OS files
 .DS_Store
 Thumbs.db
+
+# Website (separate Cloudflare deployment)
+website/
+
+# Node modules (should never be included but just in case)
+node_modules/
+
+# Scripts (dev-only)
+scripts/
+
+# Catalog source (bundled default-catalog.json is in src/)
+catalog/
+
+# Load/integration/BDD tests are already excluded by tests/ above
+# Dashboard source (built separately)
+src/dashboard/node_modules/
