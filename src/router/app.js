@@ -449,11 +449,7 @@ export async function registerRoutes(app, context) {
     const { verifyPassword } = await import('../utils/crypto.js');
     const { createDashboardToken } = await import('./auth.js');
     const stored = context.config?.dashboardPassword;
-    if (!stored) {
-      const { hashPassword } = await import('../utils/crypto.js');
-      context.config.dashboardPassword = hashPassword(password);
-      return { token: createDashboardToken(), firstLogin: true };
-    }
+    if (!stored) throw { statusCode: 500, message: 'No password configured. Re-run: npx xswarm-freeloader' };
     if (!verifyPassword(password, stored)) throw { statusCode: 401, message: 'Invalid password' };
     return { token: createDashboardToken() };
   });

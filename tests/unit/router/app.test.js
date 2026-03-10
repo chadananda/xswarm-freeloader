@@ -7,6 +7,7 @@ import { BudgetTracker } from '../../../src/budget/tracker.js';
 import { BudgetEnforcer } from '../../../src/budget/enforcer.js';
 import { CatalogSync } from '../../../src/providers/catalog-sync.js';
 import jwt from 'jsonwebtoken';
+import { hashPassword } from '../../../src/utils/crypto.js';
 
 const JWT_SECRET = process.env.XSWARM_JWT_SECRET || 'xswarm-dev-secret-change-in-production';
 function makeToken() { return jwt.sign({ dashboard: true }, JWT_SECRET, { expiresIn: '1h' }); }
@@ -26,7 +27,7 @@ describe('Router App', () => {
     const budgetTracker = new BudgetTracker(testDb.db);
     const budgetEnforcer = new BudgetEnforcer(budgetTracker);
     const context = {
-      config: { routing: { strategy: 'balanced', weights: { cost: 0.4, speed: 0.4, quality: 0.2 }, qualityGates: {} } },
+      config: { dashboardPassword: hashPassword('test-password'), routing: { strategy: 'balanced', weights: { cost: 0.4, speed: 0.4, quality: 0.2 }, qualityGates: {} } },
       logger: false,
       db: testDb.db,
       providers: testDb.providers,
@@ -91,7 +92,7 @@ describe('Router App', () => {
     expect([200, 401]).toContain(res.statusCode);
   });
 
-  it('POST /api/auth/login should work for first login', async () => {
+  it('POST /api/auth/login should authenticate with correct password', async () => {
     const res = await app.inject({
       method: 'POST', url: '/api/auth/login',
       headers: { 'content-type': 'application/json' },
@@ -100,7 +101,15 @@ describe('Router App', () => {
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.payload);
     expect(body.token).toBeTruthy();
-    expect(body.firstLogin).toBe(true);
+  });
+
+  it('POST /api/auth/login should reject wrong password', async () => {
+    const res = await app.inject({
+      method: 'POST', url: '/api/auth/login',
+      headers: { 'content-type': 'application/json' },
+      payload: { password: 'wrong-password' }
+    });
+    expect(res.statusCode).toBe(401);
   });
 
   describe('Account API', () => {

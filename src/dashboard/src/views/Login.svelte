@@ -29,7 +29,7 @@
     <div style="text-align:center; margin-bottom:2rem;">
       <div style="font-size:3rem; margin-bottom:0.5rem;">🐝</div>
       <h1 style="font-family:'Permanent Marker',cursive; font-size:1.4rem; color:#27864a; margin:0;">xswarm freeloader</h1>
-      <p style="color:#8a7f78; font-size:0.78rem; margin:0.4rem 0 0;">breaking into your own dashboard...</p>
+      <p style="color:#8a7f78; font-size:0.78rem; margin:0.4rem 0 0;">password was shown during setup</p>
     </div>
     <DashboardCard accent="green">
       <form onsubmit={handleLogin} style="display:flex; flex-direction:column; gap:1rem;">
