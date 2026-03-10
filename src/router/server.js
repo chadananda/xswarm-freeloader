@@ -106,10 +106,8 @@ export async function startServer(options = {}) {
   return { app, context };
 }
 
-// Auto-start when run directly
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
-  startServer().catch(err => {
-    console.error('Failed to start server:', err);
-    process.exit(1);
-  });
-}
+// Auto-start when run as entry point (node directly or pm2)
+startServer().catch(err => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
+});
