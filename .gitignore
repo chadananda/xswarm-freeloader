@@ -54,3 +54,6 @@ website/test-results/
 # Screenshot artifacts
 scripts/*.png
 website/screenshots/
+
+# --- standard hygiene ---
+*conflicted copy*
