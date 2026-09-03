@@ -42,7 +42,15 @@
       "WebFetch(domain:docs.mistral.ai)",
       "WebFetch(domain:docs.together.ai)",
       "WebFetch(domain:www.inceptionlabs.ai)",
-      "WebFetch(domain:docs.inceptionlabs.ai)"
+      "WebFetch(domain:docs.inceptionlabs.ai)",
+      "WebFetch(domain:varlock.dev)",
+      "WebFetch(domain:boss.taile945b3.ts.net)",
+      "WebFetch(domain:www.scraperapi.com)",
+      "WebFetch(domain:www.anthropic.com)",
+      "WebFetch(domain:customgpt.ai)",
+      "WebFetch(domain:amitkoth.com)",
+      "WebFetch(domain:groq.com)",
+      "WebFetch(domain:www.searchapi.io)"
     ]
   }
 }

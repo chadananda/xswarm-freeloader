@@ -58,7 +58,10 @@ export class CatalogSync {
         adapter: provider.adapter,
         base_url: provider.base_url,
         trust_tier: provider.trust_tier || 'open',
-        is_local: provider.is_local || false
+        is_local: provider.is_local || false,
+        signup_url: provider.signup_url || null,
+        description: provider.description || null,
+        key_format_hint: provider.key_format_hint || null
       });
       providerCount++;
 

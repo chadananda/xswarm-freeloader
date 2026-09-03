@@ -11,11 +11,12 @@ import fastifyStatic from '@fastify/static';
 import crypto from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { authenticateApiKey } from './auth.js';
 import { RateLimiter } from './rate-limiter.js';
 //
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DEFAULT_CATALOG_PATH = path.resolve(__dirname, '..', 'providers', 'default-catalog.json');
 //
 export function createApp(context) {
   const fastify = context.logger
@@ -443,6 +444,22 @@ export async function registerRoutes(app, context) {
     return result;
   });
 
+  // Full provider catalog with account status
+  app.get('/api/catalog', async () => {
+    let catalogProviders = [];
+    try { catalogProviders = JSON.parse(readFileSync(DEFAULT_CATALOG_PATH, 'utf8')).providers || []; } catch (_) {}
+    const accounts = context.accounts?.getAll() || [];
+    const accountsByProvider = {};
+    for (const a of accounts) {
+      accountsByProvider[a.provider_id] = (accountsByProvider[a.provider_id] || 0) + 1;
+    }
+    return catalogProviders.map(p => ({
+      ...p,
+      configured: !!accountsByProvider[p.id],
+      account_count: accountsByProvider[p.id] || 0
+    }));
+  });
+
   // Dashboard auth
   app.post('/api/auth/login', async (request) => {
     const { password } = request.body;
@@ -452,6 +469,116 @@ export async function registerRoutes(app, context) {
     if (!stored) throw { statusCode: 500, message: 'No password configured. Re-run: npx xswarm-freeloader' };
     if (!verifyPassword(password, stored)) throw { statusCode: 401, message: 'Invalid password' };
     return { token: createDashboardToken() };
+  });
+  //
+  // Onboarding status — returns free-tier providers not yet configured
+  app.get('/api/onboarding/status', async () => {
+    const accounts = context.accounts?.getAll() || [];
+    let catalogProviders = [];
+    try { catalogProviders = JSON.parse(readFileSync(DEFAULT_CATALOG_PATH, 'utf8')).providers || []; } catch (_) {}
+    const configuredProviderIds = new Set(accounts.map(a => a.provider_id));
+    const freeTierProviders = catalogProviders.filter(p => (p.models || []).some(m => m.free_tier));
+    const freeTierUnconfigured = freeTierProviders.filter(p => !configuredProviderIds.has(p.id)).map(p => ({
+      id: p.id, name: p.name, signup_url: p.signup_url, description: p.description, key_format_hint: p.key_format_hint
+    }));
+    return {
+      needed: accounts.length === 0,
+      accounts_count: accounts.length,
+      free_tier_unconfigured: freeTierUnconfigured,
+      email_configured: !!(context.config?.email?.enabled && context.config?.email?.provider !== 'none'),
+      password_enabled: !!context.config?.dashboardPassword
+    };
+  });
+  //
+  // Local model discovery — probes Ollama and LM Studio
+  app.post('/api/local/discover', async (request) => {
+    const { discoverLocal } = await import('../providers/local-discovery.js');
+    const customEndpoints = request.body?.endpoints || [];
+    return discoverLocal(customEndpoints);
+  });
+  //
+  // Register discovered local models into DB
+  app.post('/api/local/register', async (request) => {
+    const { models: modelsToRegister, provider_url } = request.body;
+    if (!modelsToRegister?.length) return { registered: 0 };
+    context.providers.upsert({ id: 'local', name: 'Local (Ollama/LM Studio)', adapter: 'local', base_url: provider_url || 'http://localhost:11434', trust_tier: 'private', is_local: true });
+    let registered = 0;
+    for (const model of modelsToRegister) {
+      context.models.upsert({
+        id: `local/${model.id || model.name}`, provider_id: 'local', name: model.name || model.id,
+        context_window: model.context_window || 8192, supports_tools: false, supports_vision: false,
+        pricing_input: 0, pricing_output: 0, free_tier: true
+      });
+      registered++;
+    }
+    return { registered };
+  });
+  //
+  // Export encrypted key bundle
+  app.post('/api/accounts/export', async (request, reply) => {
+    const { passphrase } = request.body;
+    if (!passphrase || passphrase.length < 8) { reply.status(400).send({ error: { message: 'Passphrase must be at least 8 characters' } }); return; }
+    const { encryptWithPassphrase } = await import('../utils/crypto.js');
+    const accounts = context.accounts?.getAll() || [];
+    const bundle = accounts.map(a => ({ provider_id: a.provider_id, api_key: a.api_key }));
+    const encrypted = encryptWithPassphrase(JSON.stringify(bundle), passphrase);
+    reply.header('Content-Type', 'application/json');
+    reply.header('Content-Disposition', 'attachment; filename="xswarm-keys-export.json"');
+    return { format: 'xswarm-keys-v1', data: encrypted, exported_at: new Date().toISOString(), count: bundle.length };
+  });
+  //
+  // Import encrypted key bundle
+  app.post('/api/accounts/import', async (request, reply) => {
+    const { passphrase, bundle } = request.body;
+    if (!passphrase || !bundle) { reply.status(400).send({ error: { message: 'passphrase and bundle required' } }); return; }
+    const { decryptWithPassphrase } = await import('../utils/crypto.js');
+    let accounts;
+    try {
+      accounts = JSON.parse(decryptWithPassphrase(bundle.data || bundle, passphrase));
+    } catch (err) {
+      reply.status(400).send({ error: { message: 'Invalid passphrase or corrupted bundle' } }); return;
+    }
+    const existing = new Set((context.accounts?.getAll() || []).map(a => a.provider_id));
+    let imported = 0, skipped = 0;
+    const errors = [];
+    for (const acct of accounts) {
+      if (existing.has(acct.provider_id)) { skipped++; continue; }
+      try {
+        context.accounts.insert({ provider_id: acct.provider_id, api_key: acct.api_key });
+        imported++;
+      } catch (err) { errors.push(`${acct.provider_id}: ${err.message}`); }
+    }
+    return { imported, skipped, errors };
+  });
+  //
+  // Enable network sharing with dashboard password
+  app.post('/api/auth/enable-password', async (request, reply) => {
+    const { password } = request.body;
+    if (!password || password.length < 8) { reply.status(400).send({ error: { message: 'Password must be at least 8 characters' } }); return; }
+    const { hashPassword } = await import('../utils/crypto.js');
+    const hashed = hashPassword(password);
+    const updatedConfig = { ...context.config, dashboardPassword: hashed, server: { ...(context.config.server || {}), host: '0.0.0.0' } };
+    if (context.configManager) {
+      context.configManager.update(updatedConfig, 'system', 'Enable network sharing with password');
+      context.config = updatedConfig;
+    }
+    const to = context.config?.email?.to;
+    if (to && context.mailer?.isConfigured()) {
+      try { await context.mailer.send(to, 'xswarm-freeloader: Dashboard Password', `<p>Your dashboard password: <code>${password}</code></p><p>Use this to log in from other devices on your network.</p>`); }
+      catch (_) { /* email failure is not fatal */ }
+    }
+    return { ok: true, restart_required: true };
+  });
+  //
+  // Disable network sharing — revert host to localhost
+  app.post('/api/auth/disable-password', async (request, reply) => {
+    const updatedConfig = { ...context.config, server: { ...(context.config.server || {}), host: '127.0.0.1' } };
+    delete updatedConfig.dashboardPassword;
+    if (context.configManager) {
+      context.configManager.update(updatedConfig, 'system', 'Disable network sharing');
+      context.config = updatedConfig;
+    }
+    return { ok: true, restart_required: true };
   });
 }
 

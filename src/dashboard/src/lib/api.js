@@ -1,3 +1,5 @@
+import { isAuthenticated } from './stores.js'
+
 const getToken = () => localStorage.getItem('jwt_token')
 
 async function apiFetch(path, options = {}) {
@@ -7,6 +9,7 @@ async function apiFetch(path, options = {}) {
   const res = await fetch(`/api${path}`, { ...options, headers })
   if (res.status === 401) {
     localStorage.removeItem('jwt_token')
+    isAuthenticated.set(false)
     window.location.hash = '#/login'
     throw new Error('Unauthorized')
   }
@@ -72,5 +75,15 @@ export const api = {
   getConfigVersions: (limit) => apiFetch(`/config/versions${limit ? '?limit=' + limit : ''}`),
   rollbackConfig: (id) => apiFetch(`/config/rollback/${id}`, { method: 'POST' }),
   // Top apps
-  topApps: (days, limit) => apiFetch(`/usage/top-apps?days=${days || 30}&limit=${limit || 10}`)
+  topApps: (days, limit) => apiFetch(`/usage/top-apps?days=${days || 30}&limit=${limit || 10}`),
+  // Provider catalog
+  catalog: () => apiFetch('/catalog'),
+  // Onboarding & key management
+  onboardingStatus: () => apiFetch('/onboarding/status'),
+  discoverLocal: (endpoints) => apiFetch('/local/discover', { method: 'POST', body: JSON.stringify({ endpoints }) }),
+  registerLocal: (models, providerUrl) => apiFetch('/local/register', { method: 'POST', body: JSON.stringify({ models, provider_url: providerUrl }) }),
+  exportKeys: (passphrase) => apiFetch('/accounts/export', { method: 'POST', body: JSON.stringify({ passphrase }) }),
+  importKeys: (passphrase, bundle) => apiFetch('/accounts/import', { method: 'POST', body: JSON.stringify({ passphrase, bundle }) }),
+  enablePassword: (password) => apiFetch('/auth/enable-password', { method: 'POST', body: JSON.stringify({ password }) }),
+  disablePassword: () => apiFetch('/auth/disable-password', { method: 'POST' })
 }

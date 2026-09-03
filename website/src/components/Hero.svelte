@@ -140,7 +140,7 @@
         </div>
       </div>
 
-      <div class="flex flex-col items-center gap-4 sm:flex-row sm:gap-12 mb-10">
+      <div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-12 mb-10">
         <!-- Provider count -->
         <div class="hero-card" style="transform: rotate(-2deg);">
           <div class="hero-card__back"></div>

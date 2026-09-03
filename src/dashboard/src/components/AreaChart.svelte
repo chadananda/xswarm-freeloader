@@ -1,6 +1,6 @@
 <script>
   // :arch: pure SVG area/line chart for time series; gradient fill; hover dots
-  // :why: zero deps; responsive viewBox; dark paper palette
+  // :why: zero deps; responsive viewBox; light paper palette
   // :rules: data=[{date,value}]; color prop for gradient; filled prop toggles area
   let { data = [], height = 200, color = '#27864a', filled = true } = $props()
 
@@ -71,12 +71,12 @@
     <!-- Grid lines -->
     {#each yTicks() as tick}
       <line x1={PADDING.left} y1={tick.y} x2={PADDING.left + innerW} y2={tick.y}
-        stroke="#3a3530" stroke-width="0.5" stroke-dasharray="3 3"/>
-      <text x={PADDING.left - 6} y={tick.y + 4} font-size="9" fill="#8a7f78" text-anchor="end">{tick.label}</text>
+        stroke="#d4cdc4" stroke-width="0.5" stroke-dasharray="3 3"/>
+      <text x={PADDING.left - 6} y={tick.y + 4} font-size="9" fill="#8b8579" text-anchor="end">{tick.label}</text>
     {/each}
     <!-- Axes -->
-    <line x1={PADDING.left} y1={PADDING.top} x2={PADDING.left} y2={PADDING.top + innerH} stroke="#3a3530" stroke-width="1"/>
-    <line x1={PADDING.left} y1={PADDING.top + innerH} x2={PADDING.left + innerW} y2={PADDING.top + innerH} stroke="#3a3530" stroke-width="1"/>
+    <line x1={PADDING.left} y1={PADDING.top} x2={PADDING.left} y2={PADDING.top + innerH} stroke="#d4cdc4" stroke-width="1"/>
+    <line x1={PADDING.left} y1={PADDING.top + innerH} x2={PADDING.left + innerW} y2={PADDING.top + innerH} stroke="#d4cdc4" stroke-width="1"/>
     <!-- Area fill -->
     {#if filled && areaPath}
       <path d={areaPath} fill="url(#{gradId})"/>
@@ -89,7 +89,7 @@
     {#each points as pt, i}
       <circle
         cx={pt.x} cy={pt.y} r={hoveredIdx === i ? 4 : 2.5}
-        fill={hoveredIdx === i ? color : '#252220'}
+        fill={hoveredIdx === i ? color : '#f0ebe0'}
         stroke={color} stroke-width="1.5"
         style="transition: r 0.15s, fill 0.15s; cursor: pointer"
         on:mouseenter={() => { hoveredIdx = i }}
@@ -104,12 +104,12 @@
       {@const d = data[hoveredIdx]}
       {@const tx = Math.min(Math.max(pt.x - 40, 2), W - 82)}
       {@const ty = Math.max(pt.y - 28, 4)}
-      <rect x={tx} y={ty} width="80" height="20" rx="3" fill="#1a1816" stroke="#3a3530" stroke-width="1"/>
-      <text x={tx + 40} y={ty + 13} font-size="9" fill="#c8bdb6" text-anchor="middle">{d.value}</text>
+      <rect x={tx} y={ty} width="80" height="20" rx="3" fill="#ede8df" stroke="#d4cdc4" stroke-width="1"/>
+      <text x={tx + 40} y={ty + 13} font-size="9" fill="#2d2a26" text-anchor="middle">{d.value}</text>
     {/if}
     <!-- X labels -->
     {#each xLabels() as lbl}
-      <text x={lbl.x} y={PADDING.top + innerH + 14} font-size="8" fill="#8a7f78" text-anchor="middle">{lbl.label}</text>
+      <text x={lbl.x} y={PADDING.top + innerH + 14} font-size="8" fill="#8b8579" text-anchor="middle">{lbl.label}</text>
     {/each}
   </svg>
 </div>

@@ -97,7 +97,7 @@
   }
   .savings-label {
     font-size: 0.8rem;
-    color: #8a7f78;
+    color: #8b8579;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     margin-bottom: 0.25rem;
@@ -112,7 +112,7 @@
   .savings-amount.negative { color: #c0392b; }
   .savings-sub {
     font-size: 0.75rem;
-    color: #8a7f78;
+    color: #8b8579;
     margin-top: 0.3rem;
   }
   .comparison-section { margin-top: 1rem; }
@@ -124,14 +124,14 @@
     margin-bottom: 0.75rem;
   }
   .comparison-col { text-align: center; }
-  .col-label { font-size: 0.7rem; color: #8a7f78; margin-bottom: 0.2rem; }
+  .col-label { font-size: 0.75rem; color: #8b8579; margin-bottom: 0.2rem; }
   .col-value { font-size: 1.25rem; font-weight: 700; }
   .col-value.green { color: #27864a; }
   .col-value.red { color: #c0392b; }
-  .comparison-divider { font-size: 0.85rem; color: #5a5248; font-style: italic; }
+  .comparison-divider { font-size: 0.85rem; color: #a09789; font-style: italic; }
   .comparison-chart { margin-top: 0.5rem; }
-  .provider-section { margin-top: 1.25rem; border-top: 1px solid #3a3530; padding-top: 0.75rem; }
-  .section-title { font-size: 0.75rem; color: #8a7f78; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.06em; }
-  .provider-legend { display: flex; align-items: center; gap: 0.3rem; font-size: 0.7rem; color: #8a7f78; margin-bottom: 0.5rem; }
+  .provider-section { margin-top: 1.25rem; border-top: 1px solid #d4cdc4; padding-top: 0.75rem; }
+  .section-title { font-size: 0.75rem; color: #8b8579; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .provider-legend { display: flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; color: #8b8579; margin-bottom: 0.5rem; }
   .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
 </style>

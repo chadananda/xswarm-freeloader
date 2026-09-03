@@ -61,3 +61,31 @@ export function verifyPassword(password, stored) {
   const verify = crypto.scryptSync(password, salt, 64).toString('hex');
   return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(verify, 'hex'));
 }
+//
+export function encryptWithPassphrase(data, passphrase) {
+  const salt = crypto.randomBytes(32);
+  const key = crypto.scryptSync(passphrase, salt, 32);
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  let encrypted = cipher.update(data, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  const authTag = cipher.getAuthTag();
+  return {
+    encrypted: `${encrypted}:${authTag.toString('hex')}`,
+    iv: iv.toString('hex'),
+    salt: salt.toString('hex')
+  };
+}
+//
+export function decryptWithPassphrase(encryptedObj, passphrase) {
+  const salt = Buffer.from(encryptedObj.salt, 'hex');
+  const key = crypto.scryptSync(passphrase, salt, 32);
+  const [encrypted, authTagHex] = encryptedObj.encrypted.split(':');
+  const iv = Buffer.from(encryptedObj.iv, 'hex');
+  const authTag = Buffer.from(authTagHex, 'hex');
+  const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+  decipher.setAuthTag(authTag);
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}

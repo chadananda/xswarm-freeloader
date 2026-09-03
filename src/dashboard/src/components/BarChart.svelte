@@ -1,6 +1,6 @@
 <script>
   // :arch: pure SVG bar chart, no libs; animated on mount; hover tooltips
-  // :why: zero deps, dark paper aesthetic with hand-drawn stroke variations
+  // :why: zero deps, light paper aesthetic with hand-drawn stroke variations
   // :rules: data = [{label,value,color}]; responsive via viewBox; CSS transitions for animation
   let { data = [], height = 200, showLabels = true } = $props()
 
@@ -49,15 +49,15 @@
   <svg viewBox="0 0 {W} {H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Bar chart">
     <!-- Y axis -->
     <line x1={PADDING.left} y1={PADDING.top} x2={PADDING.left} y2={PADDING.top + innerH}
-      stroke="#3a3530" stroke-width="1"/>
+      stroke="#d4cdc4" stroke-width="1"/>
     <!-- X axis -->
     <line x1={PADDING.left} y1={PADDING.top + innerH} x2={PADDING.left + innerW} y2={PADDING.top + innerH}
-      stroke="#3a3530" stroke-width="1"/>
+      stroke="#d4cdc4" stroke-width="1"/>
     <!-- Y ticks -->
     {#each yTicks() as tick}
       <line x1={PADDING.left - 4} y1={tick.y} x2={PADDING.left + innerW} y2={tick.y}
-        stroke="#3a3530" stroke-width="0.5" stroke-dasharray="3 3"/>
-      <text x={PADDING.left - 6} y={tick.y + 4} font-size="9" fill="#8a7f78" text-anchor="end">{tick.val}</text>
+        stroke="#d4cdc4" stroke-width="0.5" stroke-dasharray="3 3"/>
+      <text x={PADDING.left - 6} y={tick.y + 4} font-size="9" fill="#8b8579" text-anchor="end">{tick.val}</text>
     {/each}
     <!-- Bars -->
     {#each data as bar, idx}
@@ -83,7 +83,7 @@
       {#if showLabels}
         <text
           x={x + barW / 2} y={PADDING.top + innerH + 14}
-          font-size="9" fill="#8a7f78" text-anchor="middle"
+          font-size="9" fill="#8b8579" text-anchor="middle"
         >{bar.label}</text>
       {/if}
     {/each}
@@ -92,8 +92,8 @@
       {@const d = data[hoveredIdx]}
       {@const tx = Math.min(tooltipPos.x, W - 70)}
       {@const ty = Math.max(tooltipPos.y - 30, 4)}
-      <rect x={tx} y={ty} width="64" height="20" rx="3" fill="#1a1816" stroke="#3a3530" stroke-width="1"/>
-      <text x={tx + 32} y={ty + 13} font-size="10" fill="#c8bdb6" text-anchor="middle">{d.label}: {d.value}</text>
+      <rect x={tx} y={ty} width="64" height="20" rx="3" fill="#ede8df" stroke="#d4cdc4" stroke-width="1"/>
+      <text x={tx + 32} y={ty + 13} font-size="10" fill="#2d2a26" text-anchor="middle">{d.label}: {d.value}</text>
     {/if}
   </svg>
 </div>

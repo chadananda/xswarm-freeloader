@@ -38,7 +38,7 @@
 <div class="donut-wrap">
   <svg width={size} height={size} viewBox="0 0 {size} {size}" style="display:block;margin:0 auto" role="img" aria-label="Donut chart">
     <!-- Background ring -->
-    <circle cx={cx} cy={cy} r={r} fill="none" stroke="#2e2a27" stroke-width={strokeW}/>
+    <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e8e2d8" stroke-width={strokeW}/>
     <!-- Segments — rotate so first starts at top (-90deg = -PI/2) -->
     <g transform="rotate(-90 {cx} {cy})">
       {#each segs() as seg}
@@ -58,10 +58,10 @@
       {/each}
     </g>
     <!-- Center text -->
-    <text x={cx} y={cy - 6} text-anchor="middle" font-size={size * 0.1} fill="#c8bdb6" font-weight="bold">
+    <text x={cx} y={cy - 6} text-anchor="middle" font-size={size * 0.1} fill="#2d2a26" font-weight="bold">
       {hoveredIdx >= 0 && segments[hoveredIdx] ? formatTotal(segments[hoveredIdx].value) : formatTotal(total)}
     </text>
-    <text x={cx} y={cy + 10} text-anchor="middle" font-size={size * 0.065} fill="#8a7f78">
+    <text x={cx} y={cy + 10} text-anchor="middle" font-size={size * 0.065} fill="#8b8579">
       {hoveredIdx >= 0 && segments[hoveredIdx] ? segments[hoveredIdx].label : 'total'}
     </text>
   </svg>
@@ -101,7 +101,7 @@
     cursor: pointer;
     transition: opacity 0.2s;
     font-size: 0.75rem;
-    color: #c8bdb6;
+    color: #2d2a26;
   }
   .legend-dot {
     width: 8px;
@@ -109,6 +109,6 @@
     border-radius: 50%;
     flex-shrink: 0;
   }
-  .legend-label { color: #8a7f78; }
-  .legend-val { font-weight: 600; color: #c8bdb6; }
+  .legend-label { color: #8b8579; }
+  .legend-val { font-weight: 600; color: #2d2a26; }
 </style>

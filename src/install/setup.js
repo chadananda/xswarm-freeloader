@@ -10,7 +10,6 @@ import { ConfigLoader } from '../config/loader.js';
 import { AppRepository } from '../db/repositories/apps.js';
 import { CatalogSync } from '../providers/catalog-sync.js';
 import { ProviderRepository, ModelRepository } from '../db/repositories/index.js';
-import { hashPassword } from '../utils/crypto.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const XSWARM_DIR = path.join(process.env.HOME || process.env.USERPROFILE, '.xswarm');
@@ -53,18 +52,9 @@ export async function setup(options = {}) {
 
   // 3. Initialize config
   const configLoader = new ConfigLoader();
-  let dashboardPassword = null;
   if (!configLoader.exists()) {
-    const config = configLoader.load();
-    // Generate dashboard password on first setup
-    dashboardPassword = crypto.randomBytes(4).toString('hex'); // 8-char hex
-    config.dashboardPassword = hashPassword(dashboardPassword);
-    configLoader.save(config);
+    configLoader.load(); // creates default config
     console.log('  ✓ Created config.json');
-  } else if (!configLoader.load().dashboardPassword) {
-    // Existing install missing a password — generate one
-    dashboardPassword = crypto.randomBytes(4).toString('hex');
-    configLoader.set('dashboardPassword', hashPassword(dashboardPassword));
   }
 
   // 4. Initialize database
@@ -126,9 +116,6 @@ export async function setup(options = {}) {
   const dashboardUrl = `http://localhost:${routerPort}`;
   const quip = QUIPS[Math.floor(Math.random() * QUIPS.length)];
   console.log(`\n  🔑 API Key:  ${defaultApp.api_key}`);
-  if (dashboardPassword) {
-    console.log(`  🔒 Password: ${dashboardPassword}`);
-  }
   console.log(`\n  🚀 Dashboard: ${dashboardUrl}`);
   console.log(`  🔗 API:       ${dashboardUrl}/v1/`);
   console.log(`\n  ${quip}\n`);

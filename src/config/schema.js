@@ -78,7 +78,8 @@ export const ConfigSchema = z.object({
   email: EmailConfigSchema.optional(),
   catalogUrl: z.string().optional(),
   sanitization: SanitizationDefaultsSchema.optional(),
-  security: SecuritySchema.optional()
+  security: SecuritySchema.optional(),
+  dashboardPassword: z.string().optional()
 });
 
 export function validateConfig(config) {

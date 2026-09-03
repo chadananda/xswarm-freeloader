@@ -1,6 +1,8 @@
 import { writable } from 'svelte/store'
 
-export const isAuthenticated = writable(!!localStorage.getItem('jwt_token'))
+// Default to true — localhost access is trusted, no login needed.
+// If a remote 401 occurs, api.js flips this to false → shows login.
+export const isAuthenticated = writable(true)
 export const currentView = writable('Overview')
 export const providers = writable([])
 export const stats = writable({ costToday: 0, costMonth: 0, savedToday: 0, savedMonth: 0, requestsToday: 0 })

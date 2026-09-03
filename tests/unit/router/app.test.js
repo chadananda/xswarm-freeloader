@@ -87,9 +87,9 @@ describe('Router App', () => {
     expect(res.statusCode).toBe(503);
   });
 
-  it('GET /api/overview should return stats', async () => {
-    const res = await app.inject({ method: 'GET', url: '/api/overview', headers: { 'authorization': 'Bearer fake-token' } });
-    expect([200, 401]).toContain(res.statusCode);
+  it('GET /api/overview should return stats (localhost bypasses auth)', async () => {
+    const res = await app.inject({ method: 'GET', url: '/api/overview' });
+    expect(res.statusCode).toBe(200);
   });
 
   it('POST /api/auth/login should authenticate with correct password', async () => {
@@ -110,6 +110,30 @@ describe('Router App', () => {
       payload: { password: 'wrong-password' }
     });
     expect(res.statusCode).toBe(401);
+  });
+
+  it('GET /api/catalog should return annotated provider catalog', async () => {
+    const res = await app.inject({ method: 'GET', url: '/api/catalog', headers: { 'authorization': `Bearer ${dashToken}` } });
+    expect(res.statusCode).toBe(200);
+    const body = JSON.parse(res.payload);
+    expect(Array.isArray(body)).toBe(true);
+    expect(body.length).toBeGreaterThan(0);
+    // Each provider should have configured and account_count
+    const gemini = body.find(p => p.id === 'gemini');
+    expect(gemini).toBeTruthy();
+    expect(gemini.configured).toBe(false);
+    expect(gemini.account_count).toBe(0);
+    expect(gemini.models.length).toBeGreaterThan(0);
+  });
+
+  it('GET /api/catalog should show configured=true after adding account', async () => {
+    seedTestProvider(testDb, 'gemini');
+    testDb.accounts.insert({ provider_id: 'gemini', api_key: 'AIza-test' });
+    const res = await app.inject({ method: 'GET', url: '/api/catalog', headers: { 'authorization': `Bearer ${dashToken}` } });
+    const body = JSON.parse(res.payload);
+    const gemini = body.find(p => p.id === 'gemini');
+    expect(gemini.configured).toBe(true);
+    expect(gemini.account_count).toBe(1);
   });
 
   describe('Account API', () => {

@@ -3,13 +3,14 @@ import { currentView } from './stores.js'
 const routes = {
   '#/login': 'Login',
   '#/overview': 'Overview',
-  '#/providers': 'Providers',
+  '#/providers': 'Accounts',
   '#/apps': 'Apps',
   '#/accounts': 'Accounts',
   '#/routing': 'Routing',
   '#/usage': 'Usage',
   '#/opportunities': 'Opportunities',
-  '#/settings': 'Settings'
+  '#/settings': 'Settings',
+  '#/onboarding': 'Onboarding'
 }
 
 export let routeParams = {}

@@ -1,6 +1,6 @@
 <script>
   // :arch: routing strategy view — cost/speed/quality weight sliders with presets
-  // :why: DashboardCard wrapping for dark paper theme; logic unchanged
+  // :why: DashboardCard wrapping for light paper theme; logic unchanged
   import { onMount } from 'svelte'
   import { api } from '../lib/api.js'
   import DashboardCard from '../components/DashboardCard.svelte'
@@ -56,10 +56,10 @@
 <div class="space-y-5">
   <div>
     <h1 class="text-lg font-bold" style="font-family:'Permanent Marker',cursive; color:#27864a;">Routing Strategy</h1>
-    <p style="color:#8a7f78; font-size:0.78rem;">tune the freeloading algorithm</p>
+    <p style="color:#8b8579; font-size:0.78rem;">tune the freeloading algorithm</p>
   </div>
   {#if error}
-    <div style="color:#c0392b; font-size:0.75rem; background:rgba(192,57,43,0.1); border:1px solid rgba(192,57,43,0.3); border-radius:6px; padding:0.4rem 0.75rem;">{error}</div>
+    <div style="color:#c0392b; font-size:0.75rem; background:rgba(192,57,43,0.08); border:1px solid rgba(192,57,43,0.2); border-radius:6px; padding:0.4rem 0.75rem;">{error}</div>
   {/if}
   {#if routing}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -67,34 +67,34 @@
         <div class="grid grid-cols-2 gap-2" style="margin-bottom:1.5rem;">
           {#each Object.keys(presets) as key}
             <button onclick={() => applyPreset(key)}
-              style="background:#2e2a27; border:1px solid #3a3530; color:#c8bdb6; font-size:0.78rem; border-radius:6px; padding:0.5rem 0.75rem; cursor:pointer; text-align:left;">
+              style="background:#e8e2d8; border:1px solid #d4cdc4; color:#2d2a26; font-size:0.78rem; border-radius:6px; padding:0.5rem 0.75rem; cursor:pointer; text-align:left;">
               <div style="font-weight:600; text-transform:capitalize;">{key}</div>
-              <div style="font-size:0.65rem; color:#8a7f78;">cost {Math.round(presets[key].cost_weight*100)}% / speed {Math.round(presets[key].speed_weight*100)}% / quality {Math.round(presets[key].quality_weight*100)}%</div>
+              <div style="font-size:0.75rem; color:#8b8579;">cost {Math.round(presets[key].cost_weight*100)}% / speed {Math.round(presets[key].speed_weight*100)}% / quality {Math.round(presets[key].quality_weight*100)}%</div>
             </button>
           {/each}
         </div>
-        <div style="font-family:'Special Elite',serif; font-size:0.7rem; color:#8a7f78; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:1rem;">Manual weights</div>
+        <div style="font-size:0.75rem; color:#8b8579; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:1rem;">Manual weights</div>
         <div class="space-y-4">
           <div>
             <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:0.25rem;">
-              <span style="color:#c0392b;">cost</span><span style="color:#c8bdb6;">{Math.round(routing.cost_weight * 100)}%</span>
+              <span style="color:#c0392b;">cost</span><span style="color:#2d2a26;">{Math.round(routing.cost_weight * 100)}%</span>
             </div>
             <input type="range" min="0" max="1" step="0.01" bind:value={routing.cost_weight} oninput={normalize} style="width:100%; accent-color:#c0392b;" />
           </div>
           <div>
             <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:0.25rem;">
-              <span style="color:#4a6fa8;">speed</span><span style="color:#c8bdb6;">{Math.round(routing.speed_weight * 100)}%</span>
+              <span style="color:#4a6fa8;">speed</span><span style="color:#2d2a26;">{Math.round(routing.speed_weight * 100)}%</span>
             </div>
             <input type="range" min="0" max="1" step="0.01" bind:value={routing.speed_weight} oninput={normalize} style="width:100%; accent-color:#4a6fa8;" />
           </div>
           <div>
             <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:0.25rem;">
-              <span style="color:#27864a;">quality</span><span style="color:#c8bdb6;">{Math.round(routing.quality_weight * 100)}%</span>
+              <span style="color:#27864a;">quality</span><span style="color:#2d2a26;">{Math.round(routing.quality_weight * 100)}%</span>
             </div>
             <input type="range" min="0" max="1" step="0.01" bind:value={routing.quality_weight} oninput={normalize} style="width:100%; accent-color:#27864a;" />
           </div>
         </div>
-        <div style="margin-top:0.75rem; font-size:0.72rem; color:{Math.abs(total - 1) > 0.01 ? '#c0392b' : '#8a7f78'};">
+        <div style="margin-top:0.75rem; font-size:0.75rem; color:{Math.abs(total - 1) > 0.01 ? '#c0392b' : '#8b8579'};">
           total: {Math.round(total * 100)}% {Math.abs(total - 1) > 0.01 ? '(should sum to 100%)' : ''}
         </div>
         <button onclick={save} disabled={saving}
@@ -105,27 +105,27 @@
       <DashboardCard title="Per-tier overrides" accent="blue">
         <div class="space-y-3">
           {#each (routing.tier_overrides || []) as tier}
-            <div style="background:#2e2a27; border-radius:6px; padding:0.75rem;">
-              <div style="font-weight:600; font-size:0.85rem; color:#c8bdb6; margin-bottom:0.4rem; text-transform:capitalize;">{tier.name}</div>
-              <div class="grid grid-cols-3 gap-2" style="font-size:0.72rem; color:#8a7f78;">
+            <div style="background:#e8e2d8; border-radius:6px; padding:0.75rem;">
+              <div style="font-weight:600; font-size:0.85rem; color:#2d2a26; margin-bottom:0.4rem; text-transform:capitalize;">{tier.name}</div>
+              <div class="grid grid-cols-3 gap-2" style="font-size:0.75rem; color:#8b8579;">
                 <span>cost: {Math.round((tier.cost_weight || 0) * 100)}%</span>
                 <span>speed: {Math.round((tier.speed_weight || 0) * 100)}%</span>
                 <span>quality: {Math.round((tier.quality_weight || 0) * 100)}%</span>
               </div>
             </div>
           {:else}
-            <div style="color:#8a7f78; font-size:0.78rem;">no tier overrides configured — using global weights</div>
+            <div style="color:#8b8579; font-size:0.78rem;">no tier overrides configured — using global weights</div>
           {/each}
         </div>
         {#if routing.strategy}
-          <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid #3a3530;">
-            <div style="font-size:0.72rem; color:#8a7f78;">active strategy</div>
+          <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid #d4cdc4;">
+            <div style="font-size:0.75rem; color:#8b8579;">active strategy</div>
             <div style="font-size:0.9rem; color:#27864a; font-weight:600; text-transform:capitalize; margin-top:0.25rem;">{routing.strategy}</div>
           </div>
         {/if}
       </DashboardCard>
     </div>
   {:else if !error}
-    <div style="color:#8a7f78; font-size:0.85rem;">loading routing config...</div>
+    <div style="color:#8b8579; font-size:0.85rem;">loading routing config...</div>
   {/if}
 </div>

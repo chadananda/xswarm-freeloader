@@ -24,28 +24,28 @@
   }
 </script>
 
-<div style="min-height:100vh; background:#1a1816; display:flex; align-items:center; justify-content:center;">
+<div style="min-height:100vh; background:#ede8df; display:flex; align-items:center; justify-content:center;">
   <div style="width:100%; max-width:22rem; padding:0 1rem;">
     <div style="text-align:center; margin-bottom:2rem;">
       <div style="font-size:3rem; margin-bottom:0.5rem;">🐝</div>
       <h1 style="font-family:'Permanent Marker',cursive; font-size:1.4rem; color:#27864a; margin:0;">xswarm freeloader</h1>
-      <p style="color:#8a7f78; font-size:0.78rem; margin:0.4rem 0 0;">password was shown during setup</p>
+      <p style="color:#8b8579; font-size:0.78rem; margin:0.4rem 0 0;">password was shown during setup</p>
     </div>
     <DashboardCard accent="green">
       <form onsubmit={handleLogin} style="display:flex; flex-direction:column; gap:1rem;">
         <div>
-          <label style="display:block; font-size:0.75rem; color:#8a7f78; margin-bottom:0.4rem;" for="password">Password</label>
+          <label style="display:block; font-size:0.75rem; color:#8b8579; margin-bottom:0.4rem;" for="password">Password</label>
           <input
             id="password"
             type="password"
             bind:value={password}
             placeholder="shhh, it's a secret"
             autocomplete="current-password"
-            style="width:100%; background:#2e2a27; border:1px solid #3a3530; border-radius:6px; padding:0.6rem 0.75rem; color:#c8bdb6; font-size:0.85rem; outline:none; box-sizing:border-box;"
+            style="width:100%; background:#e8e2d8; border:1px solid #d4cdc4; border-radius:6px; padding:0.6rem 0.75rem; color:#2d2a26; font-size:0.85rem; outline:none; box-sizing:border-box;"
           />
         </div>
         {#if error}
-          <div style="font-size:0.78rem; color:#c0392b; background:rgba(192,57,43,0.1); border:1px solid rgba(192,57,43,0.3); border-radius:6px; padding:0.4rem 0.75rem;">{error}</div>
+          <div style="font-size:0.78rem; color:#c0392b; background:rgba(192,57,43,0.08); border:1px solid rgba(192,57,43,0.2); border-radius:6px; padding:0.4rem 0.75rem;">{error}</div>
         {/if}
         <button
           type="submit"
@@ -56,6 +56,6 @@
         </button>
       </form>
     </DashboardCard>
-    <p style="text-align:center; font-size:0.7rem; color:#5a5248; margin-top:1rem;">your free tiers are waiting</p>
+    <p style="text-align:center; font-size:0.75rem; color:#a09789; margin-top:1rem;">your free tiers are waiting</p>
   </div>
 </div>

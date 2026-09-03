@@ -28,17 +28,31 @@
         src: url('https://fonts.gstatic.com/s/sourcesans3/v15/nwpBtKy2OAdR1K-IwhWudF-R9QMylBJAV3Bo8Ky461EN.woff2') format('woff2');
       }
       :root {
-        --dash-bg: #1a1816;
-        --dash-card: #252220;
-        --dash-border: #3a3530;
-        --dash-text: #c8bdb6;
-        --dash-muted: #8a7f78;
-        --dash-green: #27864a;
-        --dash-orange: #d4831a;
-        --dash-blue: #4a6fa8;
-        --dash-red: #c0392b;
+        --page-bg: #ede8df;
+        --card-bg: #f0ebe0;
+        --input-bg: #e8e2d8;
+        --border: #d4cdc4;
+        --text: #2d2a26;
+        --muted: #8b8579;
+        --faint: #a09789;
+        --green: #27864a;
+        --orange: #d4831a;
+        --blue: #4a6fa8;
+        --red: #c0392b;
+        --noise-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.12' numOctaves='2' stitchTiles='stitch' seed='11'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)' opacity='.12'/%3E%3C/svg%3E");
+        --grain-url: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='5' stitchTiles='stitch' seed='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.08'/%3E%3C/svg%3E");
+        --paper-surface: var(--noise-grain), linear-gradient(155deg, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.04) 100%);
+        --shadow-card: 0 1px 2px rgba(30,20,10,0.08), 0 2px 6px rgba(30,20,10,0.05);
       }
-      body { margin: 0; background: var(--dash-bg); color: var(--dash-text); font-family: 'Source Sans 3', sans-serif; }
+      body {
+        margin: 0;
+        background: var(--page-bg);
+        background-image: var(--grain-url);
+        background-size: 256px;
+        background-repeat: repeat;
+        color: var(--text);
+        font-family: 'Source Sans 3', sans-serif;
+      }
     </style>
   </head>
   <body>

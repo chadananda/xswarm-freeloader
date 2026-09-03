@@ -16,7 +16,10 @@ function isLoopback(request) {
 export function authenticateApiKey(appRepo, appKeyRepo) {
   return async (request, reply) => {
     if (request.url === '/v1/health' || request.url === '/api/auth/login') return;
-    if (request.url.startsWith('/api/')) return authenticateJwt(request, reply);
+    if (request.url.startsWith('/api/')) {
+      if (isLoopback(request)) return; // localhost dashboard = trusted
+      return authenticateJwt(request, reply);
+    }
     //
     const apiKey = request.headers['x-api-key'] || request.headers['authorization']?.replace('Bearer ', '');
     const local = isLoopback(request);

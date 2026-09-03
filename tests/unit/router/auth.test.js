@@ -34,32 +34,44 @@ describe('authenticateApiKey — skip routes', () => {
   });
 });
 
-describe('authenticateApiKey — JWT auth for /api/ routes', () => {
+describe('authenticateApiKey — /api/ routes bypass JWT for localhost', () => {
+  it('skips JWT for localhost /api/ requests', async () => {
+    const middleware = authenticateApiKey(makeAppRepo(), makeAppKeyRepo());
+    const req = mockRequest({ url: '/api/settings', headers: {} });
+    await middleware(req, mockReply());
+    // No error — localhost is trusted
+    expect(req.dashboardUser).toBeUndefined();
+  });
+});
+
+describe('authenticateApiKey — JWT auth for remote /api/ routes', () => {
+  const remoteIp = { ip: '192.168.1.50', socket: { remoteAddress: '192.168.1.50' } };
+
   it('sets request.dashboardUser for valid JWT', async () => {
     const token = createDashboardToken({ userId: 42 });
     const middleware = authenticateApiKey(makeAppRepo(), makeAppKeyRepo());
-    const req = mockRequest({ url: '/api/settings', headers: { authorization: `Bearer ${token}` } });
+    const req = mockRequest({ ...remoteIp, url: '/api/settings', headers: { authorization: `Bearer ${token}` } });
     await middleware(req, mockReply());
     expect(req.dashboardUser).toBeDefined();
     expect(req.dashboardUser.userId).toBe(42);
   });
-  it('throws AuthenticationError for missing JWT on /api/ route', async () => {
+  it('throws AuthenticationError for missing JWT on remote /api/ route', async () => {
     const middleware = authenticateApiKey(makeAppRepo(), makeAppKeyRepo());
-    const req = mockRequest({ url: '/api/settings', headers: {} });
+    const req = mockRequest({ ...remoteIp, url: '/api/settings', headers: {} });
     await expect(middleware(req, mockReply())).rejects.toThrow(AuthenticationError);
   });
-  it('throws AuthenticationError for invalid/expired JWT on /api/ route', async () => {
+  it('throws AuthenticationError for invalid JWT on remote /api/ route', async () => {
     const middleware = authenticateApiKey(makeAppRepo(), makeAppKeyRepo());
-    const req = mockRequest({ url: '/api/settings', headers: { authorization: 'Bearer invalid.token.here' } });
+    const req = mockRequest({ ...remoteIp, url: '/api/settings', headers: { authorization: 'Bearer invalid.token.here' } });
     await expect(middleware(req, mockReply())).rejects.toThrow(AuthenticationError);
   });
-  it('throws AuthenticationError for tampered JWT on /api/ route', async () => {
+  it('throws AuthenticationError for tampered JWT on remote /api/ route', async () => {
     const token = createDashboardToken({ userId: 1 });
     const [header, , sig] = token.split('.');
     const tamperedPayload = Buffer.from(JSON.stringify({ userId: 99, dashboard: true })).toString('base64url');
     const tampered = `${header}.${tamperedPayload}.${sig}`;
     const middleware = authenticateApiKey(makeAppRepo(), makeAppKeyRepo());
-    const req = mockRequest({ url: '/api/data', headers: { authorization: `Bearer ${tampered}` } });
+    const req = mockRequest({ ...remoteIp, url: '/api/data', headers: { authorization: `Bearer ${tampered}` } });
     await expect(middleware(req, mockReply())).rejects.toThrow(AuthenticationError);
   });
 });

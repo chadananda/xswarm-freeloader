@@ -5,6 +5,9 @@
     {
       "id": "openai",
       "name": "OpenAI",
+      "signup_url": "https://platform.openai.com/api-keys",
+      "description": "OpenAI — GPT models (paid, premium fallback)",
+      "key_format_hint": "sk-...",
       "adapter": "openai",
       "base_url": "https://api.openai.com/v1",
       "trust_tier": "standard",
@@ -19,6 +22,9 @@
     {
       "id": "anthropic",
       "name": "Anthropic",
+      "signup_url": "https://console.anthropic.com/settings/keys",
+      "description": "Anthropic — Claude models (paid, premium fallback)",
+      "key_format_hint": "sk-ant-...",
       "adapter": "anthropic",
       "base_url": "https://api.anthropic.com",
       "trust_tier": "standard",
@@ -30,6 +36,9 @@
     {
       "id": "gemini",
       "name": "Google Gemini",
+      "signup_url": "https://aistudio.google.com/apikey",
+      "description": "Google Gemini — generous free tiers (1500 req/day)",
+      "key_format_hint": "AIza...",
       "adapter": "gemini",
       "base_url": "https://generativelanguage.googleapis.com",
       "trust_tier": "standard",
@@ -42,6 +51,9 @@
     {
       "id": "groq",
       "name": "Groq",
+      "signup_url": "https://console.groq.com/keys",
+      "description": "Groq — ultra-fast inference, free Llama & Gemma",
+      "key_format_hint": "gsk_...",
       "adapter": "groq",
       "base_url": "https://api.groq.com/openai/v1",
       "trust_tier": "open",
@@ -53,6 +65,8 @@
     {
       "id": "mistral",
       "name": "Mistral AI",
+      "signup_url": "https://console.mistral.ai/api-keys",
+      "description": "Mistral AI — free Mistral Small model",
       "adapter": "mistral",
       "base_url": "https://api.mistral.ai/v1",
       "trust_tier": "standard",
@@ -64,6 +78,8 @@
     {
       "id": "together",
       "name": "Together AI",
+      "signup_url": "https://api.together.xyz/settings/api-keys",
+      "description": "Together AI — open-source hosting (paid)",
       "adapter": "together",
       "base_url": "https://api.together.xyz/v1",
       "trust_tier": "open",
@@ -75,6 +91,10 @@
     {
       "id": "openrouter",
       "name": "OpenRouter",
+      "new": true,
+      "signup_url": "https://openrouter.ai/keys",
+      "description": "OpenRouter — gateway to 200+ models, several free",
+      "key_format_hint": "sk-or-...",
       "adapter": "openrouter",
       "base_url": "https://openrouter.ai/api/v1",
       "trust_tier": "open",
@@ -86,11 +106,31 @@
     {
       "id": "local",
       "name": "Local (Ollama/LM Studio)",
+      "signup_url": null,
+      "description": "Local models via Ollama or LM Studio (no key needed)",
       "adapter": "local",
       "base_url": "http://localhost:11434",
       "trust_tier": "private",
       "is_local": true,
       "models": []
+    },
+    {
+      "id": "freesearch",
+      "name": "FreeSearch",
+      "category": "service",
+      "builtin": true,
+      "signup_url": null,
+      "description": "Multi-provider web search — rotates across DuckDuckGo, Bing, Brave, Yahoo, Mojeek, and SearXNG to stay in free tiers. ~4,800 queries/day aggregate, zero spend.",
+      "adapter": "freesearch",
+      "trust_tier": "open",
+      "models": [
+        { "id": "freesearch/ddg", "name": "DuckDuckGo", "free_tier": true, "free_tier_rpd": 1200 },
+        { "id": "freesearch/bing", "name": "Bing", "free_tier": true, "free_tier_rpd": 2400 },
+        { "id": "freesearch/brave", "name": "Brave", "free_tier": true, "free_tier_rpd": 1200 },
+        { "id": "freesearch/yahoo", "name": "Yahoo", "free_tier": true, "free_tier_rpd": 1200 },
+        { "id": "freesearch/mojeek", "name": "Mojeek", "free_tier": true, "free_tier_rpd": 800 },
+        { "id": "freesearch/searxng", "name": "SearXNG", "free_tier": true, "free_tier_rpd": 5000 }
+      ]
     }
   ]
 }
